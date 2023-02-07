@@ -11,23 +11,45 @@ class Storage{
 public:
     //100MB
     int storage_size = 100*1024*1024;
-    unsigned char *base_ptr = (unsigned char*) malloc(storage_size);
+    unsigned char *basePtr = (unsigned char*) malloc(storage_size);
     int used_storage_size = 0;
     //200B
-    int block_size = 200;
+    static const int block_size = 200;
     //10byte for tconst
-    //1byte for rating 
+    static const int tconst_size = 10;
+    //1byte for rating
+    static const int rating_size = 1;
     //4bytes for votes
-    int record_size = 15;
-
+    static const int votes_size = 4;
+    static const int record_size = tconst_size + rating_size + votes_size;
+    static const int max_records_per_block = block_size/record_size;
+    int numBlocks = 1;
+    int curBlockSize = 0;
     Storage(){
     }
 
     ~Storage(){
-        free(this -> base_ptr);
+        free(this -> basePtr);
     }
 
-    //loadData
     void test();
+    
+    //store data and complete experiment 1
+    void store_data();
 
+    //useful for experiment 3,4,5
+    unsigned int retrieve_record_votes(unsigned char* curPtr);
+
+    //used to count how many blocks are accessed
+    unsigned int retrieve_block_id(unsigned char* curPtr);
+
+    //useful for experiment 5
+    void delete_record(unsigned char* curPtr);
+
+    //convert integer to bytes
+    unsigned char* convertIntToBytes(unsigned int n);
+    unsigned int convertBytesToInt(unsigned char * bytes);
+
+    //display record, useful for debugging
+    void display_record(unsigned char * curPtr);
 };
