@@ -246,7 +246,28 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
 //findParent operation logic
 Node *BPlusTree::findParent(Node* cursor, Node* child)
 {
-    
+    Node *parent;
+    if (cursor->IS_LEAF || (cursor->ptr[0]->IS_LEAF))
+    {
+        return NULL;
+    }
+    for (int i=0; i<cursor->size; i++)
+    {
+        if (cursor->ptr[i] == child)
+        {
+            parent = cursor;
+            return parent;
+        }
+        else
+        {
+            parent = findParent(cursor->ptr[i], child);
+            if (parent != NULL)
+            {
+                return parent;
+            }
+        }
+    }
+    return parent;
 }
 
 //getRoot operation logic
