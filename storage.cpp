@@ -10,6 +10,7 @@
 #include <cmath>
 #include <sstream>
 #include "storage.h"
+#include <fstream>
 
 void Storage::test(){
     string tconst = "t00000001";
@@ -73,9 +74,67 @@ void Storage::test(){
     std::cout << sizeof(int) <<std::endl;
 }
 
-void Storage::store_data(){
-    //make sure to check that each block can only contain 13 records
+void Storage::store_data() {
+  std::ifstream movieData("data.tsv");
+  std::string line;
+
+  string tconst;
+  string rating;
+  string numVotes;
+  float rating_float;
+  unsigned char record[record_size];
+  unsigned char *curPtr = basePtr + used_storage_size;
+  this->numBlocks = 1;
+  std::map<unsigned char *, unsigned int> map;
+  int no_of_records_in_block = 0;
+
+  // skip first row
+  getline(movieData, line);
+  // read line by line
+  while (std::getline(movieData, line)) {
+    // check if block has space, if not move on to the next block
+    if (no_of_records_in_block > max_records_per_block) {
+      curPtr += this->block_size;
+      this->numBlocks++;
+    }
+    std::istringstream ss(line);
+    // then read each element by delimiter
+    std::getline(ss, tconst, '\t');
+    std::getline(ss, rating, '\t');
+    std::getline(ss, numVotes, '\t');
+
+    memset(record, '\0', record_size);
+    int index = 0;
+    curPtr = basePtr + used_storage_size;
+    for (unsigned char c : tconst) {
+      record[index] = c;
+      index++;
+    }
+
+    std::stringstream(rating) >> rating_float;
+    // rating is now an integer that is  out of 100 instead of out of 10
+    record[tconst_size] = rating_float * 10;
+    index = tconst_size + rating_size;
+    for (int i = 0; i < sizeof(int); i++) {
+      unsigned char *p = convertIntToBytes(stoi(numVotes));
+      record[index + i] = *(p + i);
+    }
+    for (int i = 0; i < record_size; i++) {
+      curPtr[i] = record[i];
+    }
+    used_storage_size += record_size;
+  }
+  std::cout << retrieve_record_votes(basePtr) << std::endl;
+  display_record(basePtr);
+  display_record(curPtr);
+  display_record(basePtr + record_size);
+  // display_record(curPtr + used_storage_size);
+  delete_record(basePtr);
+  display_record(basePtr);
+  display_record(curPtr);
+  std::cout << sizeof(int) << std::endl;
 }
+
 
 unsigned int Storage::retrieve_record_votes(unsigned char* curPtr){
     return convertBytesToInt(curPtr+ tconst_size + rating_size);
@@ -128,5 +187,5 @@ void Storage::display_record(unsigned char* curPtr){
 
 int main(){
     Storage* storage = new Storage();
-    storage->test();
+    storage->store_data();
 }
