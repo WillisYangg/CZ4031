@@ -75,64 +75,59 @@ void Storage::test(){
 }
 
 void Storage::store_data() {
-  std::ifstream movieData("data.tsv");
-  std::string line;
+    
+    std::ifstream movieData("data.tsv");
+    std::string line;
 
-  string tconst;
-  string rating;
-  string numVotes;
-  float rating_float;
-  unsigned char record[record_size];
-  unsigned char *curPtr = basePtr + used_storage_size;
-  this->numBlocks = 1;
-  std::map<unsigned char *, unsigned int> map;
-  int no_of_records_in_block = 0;
+    string tconst;
+    string rating;
+    string numVotes;
+    float rating_float;
+    unsigned char record[record_size];
+    unsigned char *curPtr = basePtr;
+    this->numBlocks = 1;
+    std::map<unsigned char *, unsigned int> map;
+    int no_of_records_in_block = 0;
 
-  // skip first row
-  getline(movieData, line);
-  // read line by line
-  while (std::getline(movieData, line)) {
-    // check if block has space, if not move on to the next block
-    if (no_of_records_in_block > max_records_per_block) {
-      curPtr += this->block_size;
-      this->numBlocks++;
-    }
-    std::istringstream ss(line);
-    // then read each element by delimiter
-    std::getline(ss, tconst, '\t');
-    std::getline(ss, rating, '\t');
-    std::getline(ss, numVotes, '\t');
+    // skip first row
+    getline(movieData, line);
+    // read line by line
+    while (std::getline(movieData, line)) {
+        // check if block has space, if not move on to the next block
+        if (no_of_records_in_block == max_records_per_block) {
+            no_of_records_in_block = 0;
+            curPtr += this->excess_block_size;
+            this->numBlocks++;
+        }
+        std::istringstream ss(line);
+        // then read each element by delimiter
+        std::getline(ss, tconst, '\t');
+        std::getline(ss, rating, '\t');
+        std::getline(ss, numVotes, '\t');
 
-    memset(record, '\0', record_size);
-    int index = 0;
-    curPtr = basePtr + used_storage_size;
-    for (unsigned char c : tconst) {
-      record[index] = c;
-      index++;
-    }
+        memset(record, '\0', record_size);
+        int index = 0;
+        for (unsigned char c : tconst) {
+            record[index] = c;
+            index++;
+        }
 
-    std::stringstream(rating) >> rating_float;
-    // rating is now an integer that is  out of 100 instead of out of 10
-    record[tconst_size] = rating_float * 10;
-    index = tconst_size + rating_size;
-    for (int i = 0; i < sizeof(int); i++) {
-      unsigned char *p = convertIntToBytes(stoi(numVotes));
-      record[index + i] = *(p + i);
+        std::stringstream(rating) >> rating_float;
+        // rating is now an integer that is  out of 100 instead of out of 10
+        record[tconst_size] = rating_float * 10;
+        index = tconst_size + rating_size;
+        for (int i = 0; i < sizeof(int); i++) {
+            unsigned char *p = convertIntToBytes(stoi(numVotes));
+            record[index + i] = *(p + i);
+        }
+        for (int i = 0; i < record_size; i++) {
+            curPtr[i] = record[i];
+        }
+        used_storage_size += record_size;
+        curPtr += record_size;
+        no_of_records_in_block ++;
+        numRecords++;
     }
-    for (int i = 0; i < record_size; i++) {
-      curPtr[i] = record[i];
-    }
-    used_storage_size += record_size;
-  }
-  std::cout << retrieve_record_votes(basePtr) << std::endl;
-  display_record(basePtr);
-  display_record(curPtr);
-  display_record(basePtr + record_size);
-  // display_record(curPtr + used_storage_size);
-  delete_record(basePtr);
-  display_record(basePtr);
-  display_record(curPtr);
-  std::cout << sizeof(int) << std::endl;
 }
 
 
@@ -177,15 +172,41 @@ void Storage::display_record(unsigned char* curPtr){
             if(*curPtr != '\0') std::cout << *curPtr;
             curPtr++;
         }
-        std::cout <<std::endl;
-        std::cout << (float)*curPtr/10 << std::endl;
+        std::cout <<"\t";
+        std::cout << (float)*curPtr/10 << "\t";
         curPtr++;
         std::cout << convertBytesToInt(curPtr) << std::endl;
         curPtr+=4;
     }
 }
 
+void Storage::display_all_records(){
+    unsigned char *curPtr = basePtr;
+    int curRecord = 0;
+    int block_no = 1;
+    while(curRecord < numRecords){
+        if (curRecord%max_records_per_block == 0) std::cout << "Block: " << block_no << std::endl;
+        display_record(curPtr);
+        curRecord++;
+        curPtr +=record_size;
+        if (curRecord%max_records_per_block == 0) {
+            curPtr += excess_block_size;
+            block_no++;
+            std::cout << std::endl;
+        }
+    }
+}
+
+void Storage::experiment1(){
+    std::cout<< "Number of Records: " << numRecords << std::endl;
+    std::cout<< "Record Size: " << record_size << "bytes" <<std::endl;
+    std::cout<< "Number of Records in a Block: " << max_records_per_block << std::endl;
+    std::cout<< "Number of Blocks: " << numBlocks << std::endl;
+}
+
 int main(){
     Storage* storage = new Storage();
     storage->store_data();
+    storage->display_all_records();
+    storage->experiment1();
 }

@@ -23,8 +23,10 @@ public:
     static const int votes_size = 4;
     static const int record_size = tconst_size + rating_size + votes_size;
     static const int max_records_per_block = block_size/record_size;
+    static const int excess_block_size = block_size%record_size;
     int numBlocks = 1;
     int curBlockSize = 0;
+    int numRecords = 0;
     Storage(){
     }
 
@@ -52,4 +54,6 @@ public:
 
     //display record, useful for debugging
     void display_record(unsigned char * curPtr);
+    void display_all_records();
+    void experiment1();
 };
