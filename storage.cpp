@@ -136,7 +136,7 @@ unsigned int Storage::retrieve_record_votes(unsigned char* curPtr){
 }
 
 unsigned int Storage::retrieve_block_id(unsigned char* curPtr){
-    return (int)(curPtr - basePtr)/block_size;
+    return (int)(curPtr - basePtr)/block_size +1;
 }
 
 void Storage::delete_record(unsigned char* curPtr){
@@ -208,5 +208,6 @@ int main(){
     Storage* storage = new Storage();
     storage->store_data();
     storage->display_all_records();
+    std::cout << std::endl;
     storage->experiment1();
 }
