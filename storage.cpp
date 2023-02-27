@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <algorithm>
 #include <set>
 #include <stdio.h>
 #include <limits.h>
@@ -12,66 +13,18 @@
 #include "storage.h"
 #include <fstream>
 
+struct Record{
+    float rating;
+    int numVotes;
+    string tconst;
+};
+
+bool compareByNumVotes(const Record& a, const Record& b) {
+    return a.numVotes < b.numVotes;
+}
+
 void Storage::test(){
-    string tconst = "t00000001";
-    string adjustedRating = "5.9";
-    string numVotes = "2413467";
-
-    string tconst2 = "t00000002";
-    string adjustedRating2 = "10.0";
-    string numVotes2 = "6787234";
-
-    float rating_float;
-    unsigned char record[record_size];
-    std::map<unsigned char*, unsigned int> map;
-    
-    memset(record, '\0', record_size);
-    int index = 0;
-    unsigned char *curPtr = basePtr + used_storage_size;
-    for(unsigned char c: tconst){
-        record[index] = c;
-        index++;
-    }
-    std::stringstream (adjustedRating) >> rating_float;
-    //rating is now an integer that is  out of 100 instead of out of 10
-    record[tconst_size] = rating_float*10;
-    index = tconst_size + rating_size;
-    for(int i = 0; i <sizeof(int); i++){
-        unsigned char *p = convertIntToBytes(stoi(numVotes));
-        record[index+i] = *(p+i);
-    }
-    for(int i = 0; i<record_size;i++){
-        curPtr[i] = record[i];
-    }
-    used_storage_size += record_size;
-
-    memset(record, '\0', record_size);
-    index = 0;
-    curPtr = basePtr + used_storage_size;
-    for(unsigned char c: tconst2){
-        record[index] = c;
-        index++;
-    }
-    std::stringstream (adjustedRating2) >> rating_float;
-    //rating is now an integer that is  out of 100 instead of out of 10
-    record[tconst_size] = rating_float*10;
-    index = tconst_size + rating_size;
-    for(int i = 0; i <sizeof(int); i++){
-        unsigned char *p = convertIntToBytes(stoi(numVotes2));
-        record[index+i] = *(p+i);
-    }
-    for(int i = 0; i<record_size;i++){
-        curPtr[i] = record[i];
-    }
-    used_storage_size += record_size;
-
-    std::cout << retrieve_record_votes(basePtr)<<std::endl;
-    display_record(basePtr);
-    display_record(curPtr);
-    delete_record(basePtr);
-    display_record(basePtr);
-    display_record(curPtr);
-    std::cout << sizeof(int) <<std::endl;
+    std::cout << "Testing" << std::endl;
 }
 
 void Storage::store_data() {
@@ -83,6 +36,7 @@ void Storage::store_data() {
     string rating;
     string numVotes;
     float rating_float;
+    std::vector<Record> records;
     unsigned char record[record_size];
     unsigned char *curPtr = basePtr;
     this->numBlocks = 1;
@@ -93,33 +47,47 @@ void Storage::store_data() {
     getline(movieData, line);
     // read line by line
     while (std::getline(movieData, line)) {
+        Record record_obj;
+        std::istringstream ss(line);
+        // read each element by delimiter
+        std::getline(ss, tconst, '\t');
+        std::getline(ss, rating, '\t');
+        std::getline(ss, numVotes, '\t');
+
+        std::stringstream(rating) >> rating_float;
+        record_obj.tconst = tconst;
+        // rating is now an integer that is  out of 100 instead of out of 10
+        //since 100 < 256, it can be stored in 1byte
+        record_obj.rating = rating_float*10;
+        record_obj.numVotes = stoi(numVotes);
+        records.push_back(record_obj);
+    }
+    std::sort(records.begin(), records.end(), compareByNumVotes);
+    for(Record record_obj : records){
         // check if block has space, if not move on to the next block
         if (no_of_records_in_block == max_records_per_block) {
             no_of_records_in_block = 0;
             curPtr += this->excess_block_size;
             this->numBlocks++;
         }
-        std::istringstream ss(line);
-        // then read each element by delimiter
-        std::getline(ss, tconst, '\t');
-        std::getline(ss, rating, '\t');
-        std::getline(ss, numVotes, '\t');
 
+        //reset record to store new incoming record
         memset(record, '\0', record_size);
         int index = 0;
-        for (unsigned char c : tconst) {
+        //store tconst in record
+        for (unsigned char c : record_obj.tconst) {
             record[index] = c;
             index++;
         }
-
-        std::stringstream(rating) >> rating_float;
-        // rating is now an integer that is  out of 100 instead of out of 10
-        record[tconst_size] = rating_float * 10;
+        //store rating in record
+        record[tconst_size] = record_obj.rating;
         index = tconst_size + rating_size;
+        //store numVotes in record
         for (int i = 0; i < sizeof(int); i++) {
-            unsigned char *p = convertIntToBytes(stoi(numVotes));
+            unsigned char *p = convertIntToBytes(record_obj.numVotes);
             record[index + i] = *(p + i);
         }
+        //store record into storage
         for (int i = 0; i < record_size; i++) {
             curPtr[i] = record[i];
         }
