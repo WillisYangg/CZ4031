@@ -6,7 +6,8 @@
 // #include <bits/stdc++.h>
 #include <cmath>
 using namespace std;
-
+#ifndef STORAGE_H
+#define STORAGE_H
 class Storage{
 public:
     //100MB
@@ -57,3 +58,10 @@ public:
     void display_all_records();
     void experiment1();
 };
+
+struct Record{
+    float rating;
+    int numVotes;
+    string tconst;
+};
+#endif
