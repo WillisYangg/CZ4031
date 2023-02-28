@@ -2,16 +2,24 @@
 #include <climits>
 #include <fstream>
 #include <sstream>
+#include <string>
 
 using namespace std;
 
 int MAX = 3;
 
+struct keys_struct
+{
+  float key_value;
+  vector <void*> add_vect;
+};
+
 //BP Node
 class Node 
 {
     bool IS_LEAF;
-    int *key, size;
+    keys_struct *key;
+    int size;
     Node **ptr;
     friend class BPlusTree;
 public:
@@ -37,7 +45,7 @@ public:
 //Node() initialisation
 Node::Node()
 {
-    key = new int[MAX];
+    key = new keys_struct[MAX];
     ptr = new Node *[MAX +1];
 };
 
@@ -48,7 +56,7 @@ BPlusTree::BPlusTree()
 };
 
 //insert operation logic
-void BPlusTree::insert(int x)
+void BPlusTree::insert(keys_struct x)
 {   
     //empty tree
     if (root==NULL)
@@ -104,7 +112,7 @@ void BPlusTree::insert(int x)
             cout<<"Leaf node has reached, creating new leaf node\n";
             //create new leaf node
             Node *newLeaf = new Node;
-            int virtualNode[MAX+1];
+            keys_struct virtualNode[MAX+1];
             for (int i=0;i<MAX; i++)
             {
                 virtualNode[i] = cursor->key[i];
@@ -158,7 +166,7 @@ void BPlusTree::insert(int x)
 }
 
 //insertInternal operation logic
-void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
+void BPlusTree::insertInternal(keys_struct x, Node *cursor, Node *child)
 {
     //cursor is not full
     if (cursor->size <  MAX)
@@ -187,7 +195,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
     {
         //create new internal node
         Node *newInternalNode = new Node();
-        int virtualKey[MAX+1];
+        keys_struct virtualKey[MAX+1];
         Node *virtualPtr[MAX+2];
         //new key
         for (int i=0; i<MAX;i++)
@@ -279,7 +287,7 @@ Node *BPlusTree::getRoot()
 }
 
 //remove operational logic
-void BPlusTree::remove(int x) {
+void BPlusTree::remove(keys_struct x) {
   if (root == NULL) {
     cout << "Tree empty\n";
   } else {
@@ -401,7 +409,7 @@ void BPlusTree::remove(int x) {
 }
 
 //removeInternal operational logic
-void BPlusTree::removeInternal(int x, Node *cursor, Node *child) {
+void BPlusTree::removeInternal(keys_struct x, Node *cursor, Node *child) {
   if (cursor == root) {
     if (cursor->size == 1) {
       if (cursor->ptr[1] == child) {
