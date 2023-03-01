@@ -9,17 +9,17 @@
 using namespace std;
 #ifndef BPLUSTREE_H
 #define BPLUSTREE_H
-struct keys_struct
-{
-  float key_value;
-  vector <unsigned char*> add_vect;
-};
+// struct keys_struct
+// {
+//   float key_value;
+//   vector <unsigned char*> add_vect;
+// };
 
-//BP Node
+// //BP Node
 class Node 
 {
     bool IS_LEAF;
-    keys_struct *key;
+    int *key;
     int size;
     Node **ptr;
     friend class BPlusTree;
@@ -30,15 +30,15 @@ public:
 class BPlusTree
 {
     Node *root; //root node
-    void insertInternal(keys_struct& x, Node *, Node *);
-    void removeInternal(keys_struct& x, Node *, Node *);
+    void insertInternal(int x, Node *, Node *);
+    void removeInternal(int x, Node *, Node *);
     Node *findParent(Node *, Node *);
 
 public:
     BPlusTree();
     void search(int x);
-    void insert(keys_struct& x);
-    void remove(keys_struct& x);
+    void insert(int x);
+    void remove(int x);
     void display(Node *);
     Node* getRoot();
     void createTreeFromStorage(Storage *storage);

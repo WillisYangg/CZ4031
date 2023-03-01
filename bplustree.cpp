@@ -13,7 +13,7 @@ const int MAX = 3;
 //Node() initialisation
 Node::Node()
 {
-    key = new keys_struct[MAX];
+    key = new int[MAX];
     ptr = new Node *[MAX +1];
 };
 
@@ -24,8 +24,9 @@ BPlusTree::BPlusTree()
 };
 
 //insert operation logic
-void BPlusTree::insert(keys_struct& x)
+void BPlusTree::insert(int x)
 {   
+    cout<<"Inserting "<< x <<" now\n";
     //empty tree
     if (root==NULL)
     {
@@ -33,6 +34,7 @@ void BPlusTree::insert(keys_struct& x)
         root->key[0] = x;
         root->IS_LEAF = true;
         root->size = 1;
+        cout<<"Root Node:  "<< x;
     }
     else
     {
@@ -44,7 +46,7 @@ void BPlusTree::insert(keys_struct& x)
             parent = cursor;
             for (int i=0;i<cursor->size;i++)
             {
-                if (x.key_value<cursor->key[i].key_value)
+                if (x<cursor->key[i])
                 {
                     cursor = cursor->ptr[i];
                     break;
@@ -60,7 +62,7 @@ void BPlusTree::insert(keys_struct& x)
         if (cursor->size < MAX)
         {
             int i = 0;
-            while (x.key_value > cursor->key[i].key_value && i < cursor->size)
+            while (x > cursor->key[i] && i < cursor->size)
             {
                 i++;
             }
@@ -72,7 +74,7 @@ void BPlusTree::insert(keys_struct& x)
             cursor->size++;
             cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
             cursor->ptr[cursor->size - 1] = NULL;
-            cout<<"Inserted "<< x.key_value <<" successfully\n";
+            cout<<"Inserted "<< x <<" successfully\n";
         }
         //create a new leaf node if it is already at the max
         else
@@ -80,7 +82,7 @@ void BPlusTree::insert(keys_struct& x)
             cout<<"Leaf node has reached, creating new leaf node\n";
             //create new leaf node
             Node *newLeaf = new Node;
-            keys_struct virtualNode[MAX+1];
+            int virtualNode[MAX+1];
             for (int i=0;i<MAX; i++)
             {
                 virtualNode[i] = cursor->key[i];
@@ -134,13 +136,13 @@ void BPlusTree::insert(keys_struct& x)
 }
 
 //insertInternal operation logic
-void BPlusTree::insertInternal(keys_struct& x, Node *cursor, Node *child)
+void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
 {
     //cursor is not full
     if (cursor->size <  MAX)
     {
         int i = 0;
-        while (x.key_value > cursor->key[i].key_value && i < cursor->size)
+        while (x > cursor->key[i] && i < cursor->size)
         {
             i++;
         }
@@ -163,7 +165,7 @@ void BPlusTree::insertInternal(keys_struct& x, Node *cursor, Node *child)
     {
         //create new internal node
         Node *newInternalNode = new Node();
-        keys_struct virtualKey[MAX+1];
+        int virtualKey[MAX+1];
         Node *virtualPtr[MAX+2];
         //new key
         for (int i=0; i<MAX;i++)
@@ -176,7 +178,7 @@ void BPlusTree::insertInternal(keys_struct& x, Node *cursor, Node *child)
             virtualPtr[i] = cursor->ptr[i];
         }
         int i=0, j;
-        while (x.key_value > virtualKey[i].key_value && i<MAX)
+        while (x > virtualKey[i] && i<MAX)
         {
             i++;
         }
@@ -255,7 +257,7 @@ Node *BPlusTree::getRoot()
 }
 
 //remove operational logic
-void BPlusTree::remove(keys_struct& x) {
+void BPlusTree::remove(int x) {
   if (root == NULL) {
     cout << "Tree empty\n";
   } else {
@@ -267,7 +269,7 @@ void BPlusTree::remove(keys_struct& x) {
         parent = cursor;
         leftSibling = i - 1;
         rightSibling = i + 1;
-        if (x.key_value < cursor->key[i].key_value) {
+        if (x < cursor->key[i]) {
           cursor = cursor->ptr[i];
           break;
         }
@@ -282,7 +284,7 @@ void BPlusTree::remove(keys_struct& x) {
     bool found = false;
     int pos;
     for (pos = 0; pos < cursor->size; pos++) {
-      if (cursor->key[pos].key_value == x.key_value) {
+      if (cursor->key[pos] == x) {
         found = true;
         break;
       }
@@ -377,7 +379,7 @@ void BPlusTree::remove(keys_struct& x) {
 }
 
 //removeInternal operational logic
-void BPlusTree::removeInternal(keys_struct& x, Node *cursor, Node *child) {
+void BPlusTree::removeInternal(int x, Node *cursor, Node *child) {
   if (cursor == root) {
     if (cursor->size == 1) {
       if (cursor->ptr[1] == child) {
@@ -405,7 +407,7 @@ void BPlusTree::removeInternal(keys_struct& x, Node *cursor, Node *child) {
   }
   int pos;
   for (pos = 0; pos < cursor->size; pos++) {
-    if (cursor->key[pos].key_value == x.key_value) {
+    if (cursor->key[pos] == x) {
       break;
     }
   }
@@ -506,7 +508,7 @@ void BPlusTree::search(int x) {
     Node *cursor = root;
     while (cursor->IS_LEAF == false) {
       for (int i = 0; i < cursor->size; i++) {
-        if (x < cursor->key[i].key_value) {
+        if (x < cursor->key[i]) {
           cursor = cursor->ptr[i];
           break;
         }
@@ -517,7 +519,7 @@ void BPlusTree::search(int x) {
       }
     }
     for (int i = 0; i < cursor->size; i++) {
-      if (cursor->key[i].key_value == x) {
+      if (cursor->key[i] == x) {
         cout << "Found\n";
         return;
       }
@@ -526,69 +528,106 @@ void BPlusTree::search(int x) {
   }
 }
 
-void BPlusTree::createTreeFromStorage(Storage *storage){
-  //iterate through records
-  //each record in storage takes up 15bytes
-  //the basePtr points to the first byte in the first record
-  //as such, the first 10bytes represents tconst of the first record
-  //the 11th byte represents the rating 
-  //the 12th - 15th byte represents numVotes
-  //the 16th byte represents the first byte in the second record
-  //so on n so forth
-  unsigned char *curPtr = storage->basePtr;
-  int curRecord = 0;
-  int block_no = 1;
-  while(curRecord < storage->numRecords){
-    keys_struct x;
-    //not sure what the add_vect is for
-    x.add_vect.push_back(curPtr);
+// void BPlusTree::createTreeFromStorage(Storage *storage){
+//   //iterate through records
+//   //each record in storage takes up 15bytes
+//   //the basePtr points to the first byte in the first record
+//   //as such, the first 10bytes represents tconst of the first record
+//   //the 11th byte represents the rating 
+//   //the 12th - 15th byte represents numVotes
+//   //the 16th byte represents the first byte in the second record
+//   //so on n so forth
+//   unsigned char *curPtr = storage->basePtr;
+//   int curRecord = 0;
+//   int block_no = 1;
+//   while(curRecord < storage->numRecords){
+//     vector<int> x;
+//     //not sure what the add_vect is for
+//     x.push_back(curPtr);
 
-    //this stored the numVotes of the current record in key_value
-    // std::cout << storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size) << std::endl;
-    //im assuming that x.key_value is supposed to store the numVotes of the current record
-    x.key_value = storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size);
-    //INSERTION INTO THE BPLUSTREE CAN TAKE PLACE HERE
-    // insert(x);
+//     //this stored the numVotes tof the current record in key_value
+//     // std::cout << storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size) << std::endl;
+//     //im assuming that x.key_value is supposed to store the numVotes of the current record
+//     x = storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size);
+//     //INSERTION INTO THE BPLUSTREE CAN TAKE PLACE HERE
+//     // insert(x);
 
-    //comment out this section of code to remove printing the record in terminal
-    //please uncomment line 575-577 below if you comment out this section of code
-    //section start//
-    if (curRecord%storage->max_records_per_block == 0) std::cout << "Block: " << block_no << std::endl;
-    if(*curPtr == '\0') std::cout << "Record does not exist" << std::endl;
-    else{
-      for(int i = 0; i< storage->tconst_size;i++){
-        if(*curPtr != '\0') std::cout << *curPtr;
-        curPtr++;
-      }
-      std::cout <<"\t";
-      std::cout << (float)*curPtr/10 << "\t";
-      curPtr++;
-      std::cout << storage->convertBytesToInt(curPtr) << std::endl;
-      curPtr+=4;
-    }
-    //section end
+//     //comment out this section of code to remove printing the record in terminal
+//     //please uncomment line 575-577 below if you comment out this section of code
+//     //section start//
+//     if (curRecord%storage->max_records_per_block == 0) std::cout << "Block: " << block_no << std::endl;
+//     if(*curPtr == '\0') std::cout << "Record does not exist" << std::endl;
+//     else{
+//       for(int i = 0; i< storage->tconst_size;i++){
+//         if(*curPtr != '\0') std::cout << *curPtr;
+//         curPtr++;
+//       }
+//       std::cout <<"\t";
+//       std::cout << (float)*curPtr/10 << "\t";
+//       curPtr++;
+//       std::cout << storage->convertBytesToInt(curPtr) << std::endl;
+//       curPtr+=4;
+//     }
+//     //section end
 
-    //keeps track of number of records iterated
-    //this is also used to track which block we are in
-    curRecord++;
+//     //keeps track of number of records iterated
+//     //this is also used to track which block we are in
+//     curRecord++;
     
-    //uncomment these 3 lines of code if you comment out the previous code section
-    // storage->display_record(curPtr);
-    // //jumps to the first byte of the next record
-    // curPtr +=storage->record_size;
+//     //uncomment these 3 lines of code if you comment out the previous code section
+//     // storage->display_record(curPtr);
+//     // //jumps to the first byte of the next record
+//     // curPtr +=storage->record_size;
 
 
-    //if curRecord%store->max_records_per_block is zero
-    //it means that the current block is full
-    if (curRecord%storage->max_records_per_block == 0) {
-        //points to the first byte of the first record in the next block
-        curPtr += storage->excess_block_size;
-        block_no++;
-        std::cout << std::endl;
+//     //if curRecord%store->max_records_per_block is zero
+//     //it means that the current block is full
+//     if (curRecord%storage->max_records_per_block == 0) {
+//         //points to the first byte of the first record in the next block
+//         curPtr += storage->excess_block_size;
+//         block_no++;
+//         std::cout << std::endl;
+//     }
+//   }
+// }
+
+void BPlusTree::display(Node *cursor)
+{
+  if (cursor != NULL) 
+  {
+    for (int i = 0; i < cursor->size; i++) 
+    {
+      cout << cursor->key[i] << "|";
+    }
+    cout << "\n";
+    if (cursor->IS_LEAF != true) 
+    {
+      for (int i = 0; i < cursor->size + 1; i++) 
+      {
+        display(cursor->ptr[i]);
+      }
     }
   }
 }
 
-void BPlusTree::display(Node *cursor){
-  cout<<"hello"<<endl;
+int main(){
+  BPlusTree node;
+  node.insert(4);
+  node.display(node.getRoot());
+  node.insert(15);
+  node.display(node.getRoot());
+  node.insert(25);
+  node.display(node.getRoot());
+  node.insert(35);
+  node.display(node.getRoot());
+  // node.insert(45);
+  // node.display(node.getRoot());
+  // node.insert(55);
+  // node.display(node.getRoot());
+  // node.insert(40);
+  // node.display(node.getRoot());
+  // node.insert(30);
+  // node.display(node.getRoot());
+  // node.insert(20);
+  // node.display(node.getRoot());
 }
