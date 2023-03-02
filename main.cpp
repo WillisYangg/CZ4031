@@ -21,6 +21,9 @@ int main(){
     std::cout << std::endl;
     storage->experiment1();
 
-    BPlusTree* bplustree = new BPlusTree();
-    bplustree->createTreeFromStorage(storage);
+    // BPlusTree* bplustree = new BPlusTree();
+    BPlusTree bplustree;
+    bplustree.createTreeFromStorage(storage);
+    std::cout << "testing" << std::endl;
+    bplustree.display(bplustree.getRoot());
 }

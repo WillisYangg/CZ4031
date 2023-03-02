@@ -34,7 +34,7 @@ void BPlusTree::insert(int x)
         root->key[0] = x;
         root->IS_LEAF = true;
         root->size = 1;
-        cout<<"Root Node:  "<< x;
+        cout<<"Root Node:  "<< x << endl;
     }
     else
     {
@@ -111,9 +111,11 @@ void BPlusTree::insert(int x)
             {
                 newLeaf->key[i] = virtualNode[j];
             }
+            cout<<"1\n";
             //tree only has one node (root node)
             if (cursor == root)
             {
+                cout<<"2\n";
                 //create a new root node
                 //tree grows upwards, form new root node
                 Node *newRootNode = new Node();
@@ -127,6 +129,7 @@ void BPlusTree::insert(int x)
             }
             else
             {
+                cout<<"3\n";
                 //insert new key into parent node
                 insertInternal(newLeaf->key[0], parent, newLeaf);
                 cout<<"Inserted key into parent node successfully\n";
@@ -139,8 +142,10 @@ void BPlusTree::insert(int x)
 void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
 {
     //cursor is not full
+    cout<<"a\n";
     if (cursor->size <  MAX)
     {
+        cout<<"b\n";
         int i = 0;
         while (x > cursor->key[i] && i < cursor->size)
         {
@@ -163,6 +168,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
     }
     else
     {
+        cout<<"c\n";
         //create new internal node
         Node *newInternalNode = new Node();
         int virtualKey[MAX+1];
@@ -206,6 +212,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
         }
         if (cursor == root)
         {
+            cout<<"d\n";
             //create a new root node
             Node *newRootNode = new Node();
             newRootNode->key[0] = cursor->key[cursor->size];
@@ -218,6 +225,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
         }
         else
         {
+            cout<<"e\n";
             insertInternal(cursor->key[cursor->size], findParent(root, cursor), newInternalNode);
         }
     }
@@ -528,68 +536,68 @@ void BPlusTree::search(int x) {
   }
 }
 
-// void BPlusTree::createTreeFromStorage(Storage *storage){
-//   //iterate through records
-//   //each record in storage takes up 15bytes
-//   //the basePtr points to the first byte in the first record
-//   //as such, the first 10bytes represents tconst of the first record
-//   //the 11th byte represents the rating 
-//   //the 12th - 15th byte represents numVotes
-//   //the 16th byte represents the first byte in the second record
-//   //so on n so forth
-//   unsigned char *curPtr = storage->basePtr;
-//   int curRecord = 0;
-//   int block_no = 1;
-//   while(curRecord < storage->numRecords){
-//     vector<int> x;
-//     //not sure what the add_vect is for
-//     x.push_back(curPtr);
+void BPlusTree::createTreeFromStorage(Storage *storage){
+  //iterate through records
+  //each record in storage takes up 15bytes
+  //the basePtr points to the first byte in the first record
+  //as such, the first 10bytes represents tconst of the first record
+  //the 11th byte represents the rating 
+  //the 12th - 15th byte represents numVotes
+  //the 16th byte represents the first byte in the second record
+  //so on n so forth
+  unsigned char *curPtr = storage->basePtr;
+  int curRecord = 0;
+  int block_no = 1;
+  while(curRecord < storage->numRecords){
+    // vector<int> x;
+    //not sure what the add_vect is for
+    // x.push_back(curPtr);
 
-//     //this stored the numVotes tof the current record in key_value
-//     // std::cout << storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size) << std::endl;
-//     //im assuming that x.key_value is supposed to store the numVotes of the current record
-//     x = storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size);
-//     //INSERTION INTO THE BPLUSTREE CAN TAKE PLACE HERE
-//     // insert(x);
+    //this stored the numVotes tof the current record in key_value
+    // std::cout << storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size) << std::endl;
+    //im assuming that x.key_value is supposed to store the numVotes of the current record
+    this->insert(storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size));
+    //INSERTION INTO THE BPLUSTREE CAN TAKE PLACE HERE
+    // insert(x);
 
-//     //comment out this section of code to remove printing the record in terminal
-//     //please uncomment line 575-577 below if you comment out this section of code
-//     //section start//
-//     if (curRecord%storage->max_records_per_block == 0) std::cout << "Block: " << block_no << std::endl;
-//     if(*curPtr == '\0') std::cout << "Record does not exist" << std::endl;
-//     else{
-//       for(int i = 0; i< storage->tconst_size;i++){
-//         if(*curPtr != '\0') std::cout << *curPtr;
-//         curPtr++;
-//       }
-//       std::cout <<"\t";
-//       std::cout << (float)*curPtr/10 << "\t";
-//       curPtr++;
-//       std::cout << storage->convertBytesToInt(curPtr) << std::endl;
-//       curPtr+=4;
-//     }
-//     //section end
+    //comment out this section of code to remove printing the record in terminal
+    //please uncomment line 575-577 below if you comment out this section of code
+    //section start//
+    // if (curRecord%storage->max_records_per_block == 0) std::cout << "Block: " << block_no << std::endl;
+    // if(*curPtr == '\0') std::cout << "Record does not exist" << std::endl;
+    // else{
+    //   for(int i = 0; i< storage->tconst_size;i++){
+    //     if(*curPtr != '\0') std::cout << *curPtr;
+    //     curPtr++;
+    //   }
+    //   std::cout <<"\t";
+    //   std::cout << (float)*curPtr/10 << "\t";
+    //   curPtr++;
+    //   std::cout << storage->convertBytesToInt(curPtr) << std::endl;
+    //   curPtr+=4;
+    // }
+    //section end
 
-//     //keeps track of number of records iterated
-//     //this is also used to track which block we are in
-//     curRecord++;
+    //keeps track of number of records iterated
+    //this is also used to track which block we are in
+    curRecord++;
     
-//     //uncomment these 3 lines of code if you comment out the previous code section
-//     // storage->display_record(curPtr);
-//     // //jumps to the first byte of the next record
-//     // curPtr +=storage->record_size;
+    //uncomment these 3 lines of code if you comment out the previous code section
+    // storage->display_record(curPtr);
+    //jumps to the first byte of the next record
+    curPtr +=storage->record_size;
 
 
-//     //if curRecord%store->max_records_per_block is zero
-//     //it means that the current block is full
-//     if (curRecord%storage->max_records_per_block == 0) {
-//         //points to the first byte of the first record in the next block
-//         curPtr += storage->excess_block_size;
-//         block_no++;
-//         std::cout << std::endl;
-//     }
-//   }
-// }
+    //if curRecord%store->max_records_per_block is zero
+    //it means that the current block is full
+    if (curRecord%storage->max_records_per_block == 0) {
+        //points to the first byte of the first record in the next block
+        curPtr += storage->excess_block_size;
+        block_no++;
+        std::cout << std::endl;
+    }
+  }
+}
 
 void BPlusTree::display(Node *cursor)
 {
@@ -610,24 +618,24 @@ void BPlusTree::display(Node *cursor)
   }
 }
 
-int main(){
-  BPlusTree node;
-  node.insert(4);
-  node.display(node.getRoot());
-  node.insert(15);
-  node.display(node.getRoot());
-  node.insert(25);
-  node.display(node.getRoot());
-  node.insert(35);
-  node.display(node.getRoot());
-  // node.insert(45);
-  // node.display(node.getRoot());
-  // node.insert(55);
-  // node.display(node.getRoot());
-  // node.insert(40);
-  // node.display(node.getRoot());
-  // node.insert(30);
-  // node.display(node.getRoot());
-  // node.insert(20);
-  // node.display(node.getRoot());
-}
+// int main(){
+//   BPlusTree node;
+//   node.insert(4);
+//   // node.display(node.getRoot());
+//   node.insert(15);
+//   // node.display(node.getRoot());
+//   node.insert(25);
+//   // node.display(node.getRoot());
+//   node.insert(35);
+//   node.display(node.getRoot());
+//   // node.insert(45);
+//   // node.display(node.getRoot());
+//   // node.insert(55);
+//   // node.display(node.getRoot());
+//   // node.insert(40);
+//   // node.display(node.getRoot());
+//   // node.insert(30);
+//   // node.display(node.getRoot());
+//   // node.insert(20);
+//   // node.display(node.getRoot());
+// }
