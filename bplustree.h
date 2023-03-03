@@ -18,12 +18,12 @@ using namespace std;
 // //BP Node
 class Node 
 {
-    bool IS_LEAF;
-    int *key;
-    int size;
-    Node **ptr;
+    bool IS_LEAF; //2byte
+    int *key; //8byte
+    int size; //4byte
+    Node **ptr;//8byte
     //to point to records
-    unsigned char **records;
+    unsigned char **records;//8byte
     friend class BPlusTree;
 public:
     Node();
@@ -41,7 +41,8 @@ public:
     void search(int x);
     void insert(int x,unsigned char *record);
     void remove(int x);
-    void display(Node *);
+    void display();
+    void displayRecords(Storage *storage);
     Node* getRoot();
     void createTreeFromStorage(Storage *storage);
     Node* createNewLeafNode(int x, unsigned char *record);

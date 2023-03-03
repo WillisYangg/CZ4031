@@ -16,7 +16,7 @@
 
 int main(){
     Storage* storage = new Storage();
-    storage->store_data();
+    storage->store_data("data.tsv");
     // storage->display_all_records();
     std::cout << std::endl;
     storage->experiment1();
@@ -25,5 +25,8 @@ int main(){
     BPlusTree bplustree;
     bplustree.createTreeFromStorage(storage);
     std::cout << "testing" << std::endl;
-    bplustree.display(bplustree.getRoot());
+    // bplustree.display();
+    // bplustree.displayRecords(storage);
+    bplustree.search(500);
+    std::cout << "end test" << std::endl;
 }

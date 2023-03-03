@@ -5,17 +5,23 @@
 #include <string>
 #include <vector>
 #include "bplustree.h"
+#include <queue>
+
 
 using namespace std;
 
-const int MAX = 3;
+//size of node = size of block = 200
+//size of node = 2 +4N + 4 + 8(N+1)
+//200 = 12N +14
+//N = (200-14)/12
+const int N = (200-14)/12;
 
 //Node() initialisation
 Node::Node()
 {
-    key = new int[MAX];
-    ptr = new Node *[MAX +1];
-    records = new unsigned char *[MAX];
+    key = new int[N];
+    ptr = new Node *[N +1];
+    records = new unsigned char *[N];
 };
 
 //BPlusTree() initialisation
@@ -32,10 +38,8 @@ Node* BPlusTree::createNewLeafNode(int x, unsigned char *record){
     node->size = 1;
 
     //elvis logic
-    node->ptr[0] = new Node;
-    node->ptr[0]->records[0] = record;
-    node->ptr[0]->size = 1;
-    node->ptr[0]->key[0] = x;
+    node->ptr[0] = createNewBufferNode(x,record);
+    node->ptr[N] = NULL;
     return node;
 }
 
@@ -45,13 +49,14 @@ Node* BPlusTree::createNewBufferNode(int x, unsigned char *record){
     node->records[0] = record;
     node->size = 1;
     node->key[0] = x;
+    node->ptr[0] = NULL;
     return node;
 }
 //insert operation logic
 // void BPlusTree::insert(int x)
 void BPlusTree::insert(int x,unsigned char *record)
 {   
-    cout<<"Inserting "<< x <<" now\n";
+    // cout<<"Inserting "<< x <<" now\n";
     //empty tree
     if (root==NULL)
     {
@@ -81,7 +86,7 @@ void BPlusTree::insert(int x,unsigned char *record)
             }
         }
         //cursor at leaf node, add nodes to the leaf node
-        if (cursor->size < MAX)
+        if (cursor->size < N)
         {
             int i = 0;
             while (x > cursor->key[i] && i < cursor->size)
@@ -96,17 +101,18 @@ void BPlusTree::insert(int x,unsigned char *record)
                 //curBuffer should never be null in the first iteration
                 while(true){
                   if(curBuffer->ptr[0] != NULL) curBuffer = curBuffer->ptr[0];
+                  else break;
                 }
                 int key_buffer_size =curBuffer->size;
                 //there is remaining space in the buffer
-                if(key_buffer_size < MAX){
+                if(key_buffer_size < N){
                     curBuffer->records[curBuffer->size] = record;
                     curBuffer->size ++;
                 //current buffer is full
                 //create new buffer to store the record
                 //for simplicity sake
                 //each buffer node only points to 1 other buffer node like a linked list
-                //though each buffer node can store up to MAX+1 buffer nodes
+                //though each buffer node can store up to N+1 buffer nodes
                 }else{
                     Node* newBuffer = createNewBufferNode(x, record);
                     curBuffer->ptr[0] = newBuffer;
@@ -140,8 +146,8 @@ void BPlusTree::insert(int x,unsigned char *record)
             cout<<"Leaf node has reached, creating new leaf node\n";
             //create new leaf node
             Node *newLeaf = new Node;
-            int virtualNode[MAX+1];
-            Node* buffers[MAX+1];
+            int virtualNode[N+1];
+            Node* buffers[N+1];
 
             int insert_index = 0;
             while (x > cursor->key[insert_index] && insert_index < cursor->size)
@@ -149,7 +155,7 @@ void BPlusTree::insert(int x,unsigned char *record)
                 insert_index++;
             }
 
-            for (int i=0;i<=MAX; i++)
+            for (int i=0;i<=N; i++)
             {
                 if(i<insert_index) {
                   virtualNode[i] = cursor->key[i];
@@ -170,12 +176,12 @@ void BPlusTree::insert(int x,unsigned char *record)
 
             
             newLeaf->IS_LEAF = true;
-            newLeaf->size = (MAX + 1) / 2;
-            cursor->size = (MAX + 1) - ((MAX + 1) / 2);
+            newLeaf->size = (N + 1) / 2;
+            cursor->size = (N + 1) - ((N + 1) / 2);
 
-            Node *temp = cursor->ptr[MAX];
-            cursor->ptr[MAX] = newLeaf;
-            newLeaf->ptr[MAX] = temp;
+            Node *temp = cursor->ptr[N];
+            cursor->ptr[N] = newLeaf;
+            newLeaf->ptr[N] = temp;
 
             //fill up the new leaf node
             for (int i=0;i<cursor->size;i++)
@@ -184,17 +190,17 @@ void BPlusTree::insert(int x,unsigned char *record)
                 //elvis logic
                 cursor->ptr[i] = buffers[i];
             }
-            for (int i=0, int j=cursor->size; i<newLeaf->size; i++,j++)
+            for (int i=0, j=cursor->size; i<newLeaf->size; i++,j++)
             {
                 newLeaf->key[i] = virtualNode[j];
                 //elvis logic
                 newLeaf->ptr[i] = buffers[j];
             }
-            cout<<"1\n";
+            // cout<<"1\n";
             //tree only has one node (root node)
             if (cursor == root)
             {
-                cout<<"2\n";
+                // cout<<"2\n";
                 //create a new root node
                 //tree grows upwards, form new root node
                 Node *newRootNode = new Node();
@@ -208,9 +214,10 @@ void BPlusTree::insert(int x,unsigned char *record)
             }
             else
             {
-                cout<<"3\n";
+                // cout<<"3\n";
                 //insert new key into parent node
                 insertInternal(newLeaf->key[0], parent, newLeaf);
+                
                 cout<<"Inserted key into parent node successfully\n";
             }
         }
@@ -221,11 +228,10 @@ void BPlusTree::insert(int x,unsigned char *record)
 void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
 {
     //cursor is not full
-    cout<<"a\n";
-    cout<<cursor->size<<endl;
-    if (cursor->size <  MAX)
+    // cout<<"a\n";
+    if (cursor->size <  N)
     {
-        cout<<"b\n";
+        // cout<<"b\n";
         int i = 0;
         while (x > cursor->key[i] && i < cursor->size)
         {
@@ -248,39 +254,39 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
     }
     else
     {
-        cout<<"c\n";
+        // cout<<"c\n";
         //create new internal node
         Node *newInternalNode = new Node();
-        int virtualKey[MAX+1];
-        Node *virtualPtr[MAX+2];
+        int virtualKey[N+1];
+        Node *virtualPtr[N+2];
         //new key
-        for (int i=0; i<MAX;i++)
+        for (int i=0; i<N;i++)
         {
             virtualKey[i] = cursor->key[i];
         }
         //new pointer
-        for (int i=0; i<MAX+1;i++)
+        for (int i=0; i<N+1;i++)
         {
             virtualPtr[i] = cursor->ptr[i];
         }
         int i=0, j;
-        while (x > virtualKey[i] && i<MAX)
+        while (x > virtualKey[i] && i<N)
         {
             i++;
         }
-        for (int j = MAX+1; j>i; j--)
+        for (int j = N+1; j>i; j--)
         {
             virtualKey[j] = virtualKey[j-1];
         }
         virtualKey[i] = x;
-        for (int j=MAX+2; j>i; j--)
+        for (int j=N+2; j>i; j--)
         {
             virtualPtr[j] = virtualPtr[j-1];
         }
         virtualPtr[i+1]=child;
         newInternalNode->IS_LEAF = false;
-        cursor->size = (MAX+1)/2;
-        newInternalNode->size = MAX - (MAX+1)/2;
+        cursor->size = (N+1)/2;
+        newInternalNode->size = N - (N+1)/2;
         //fill up the new internal node
         for (i=0, j=cursor->size+1; i<newInternalNode->size; i++,j++)
         {
@@ -292,7 +298,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
         }
         if (cursor == root)
         {
-            cout<<"d\n";
+            // cout<<"d\n";
             //create a new root node
             Node *newRootNode = new Node();
             newRootNode->key[0] = cursor->key[cursor->size];
@@ -305,7 +311,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
         }
         else
         {
-            cout<<"e\n";
+            // cout<<"e\n";
             insertInternal(cursor->key[cursor->size], findParent(root, cursor), newInternalNode);
         }
     }
@@ -315,16 +321,13 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
 Node *BPlusTree::findParent(Node* cursor, Node* child)
 {
     Node *parent;
-    cout<< "x" <<cursor->IS_LEAF << endl;
-    cout<< "y" <<(cursor->ptr[0]->IS_LEAF) << endl;
     if (cursor->IS_LEAF || (cursor->ptr[0]->IS_LEAF))
     {
-        cout<<"z"<<endl;
         return NULL;
     }
-    cout<<"j"<< cursor->size << endl;
-    for (int i=0; i<cursor->size; i++)
+    for (int i=0; i<cursor->size+1; i++)
     {
+
         if (cursor->ptr[i] == child)
         {
             parent = cursor;
@@ -339,7 +342,6 @@ Node *BPlusTree::findParent(Node* cursor, Node* child)
             }
         }
     }
-    cout<<"k"<< endl;
     return parent;
 }
 
@@ -391,7 +393,7 @@ void BPlusTree::remove(int x) {
     }
     cursor->size--;
     if (cursor == root) {
-      for (int i = 0; i < MAX + 1; i++) {
+      for (int i = 0; i < N + 1; i++) {
         cursor->ptr[i] = NULL;
       }
       if (cursor->size == 0) {
@@ -405,12 +407,12 @@ void BPlusTree::remove(int x) {
     }
     cursor->ptr[cursor->size] = cursor->ptr[cursor->size + 1];
     cursor->ptr[cursor->size + 1] = NULL;
-    if (cursor->size >= (MAX + 1) / 2) {
+    if (cursor->size >= (N + 1) / 2) {
       return;
     }
     if (leftSibling >= 0) {
       Node *leftNode = parent->ptr[leftSibling];
-      if (leftNode->size >= (MAX + 1) / 2 + 1) {
+      if (leftNode->size >= (N + 1) / 2 + 1) {
         for (int i = cursor->size; i > 0; i--) {
           cursor->key[i] = cursor->key[i - 1];
         }
@@ -427,7 +429,7 @@ void BPlusTree::remove(int x) {
     }
     if (rightSibling <= parent->size) {
       Node *rightNode = parent->ptr[rightSibling];
-      if (rightNode->size >= (MAX + 1) / 2 + 1) {
+      if (rightNode->size >= (N + 1) / 2 + 1) {
         cursor->size++;
         cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
         cursor->ptr[cursor->size - 1] = NULL;
@@ -516,7 +518,7 @@ void BPlusTree::removeInternal(int x, Node *cursor, Node *child) {
     cursor->ptr[i] = cursor->ptr[i + 1];
   }
   cursor->size--;
-  if (cursor->size >= (MAX + 1) / 2 - 1) {
+  if (cursor->size >= (N + 1) / 2 - 1) {
     return;
   }
   if (cursor == root)
@@ -532,7 +534,7 @@ void BPlusTree::removeInternal(int x, Node *cursor, Node *child) {
   }
   if (leftSibling >= 0) {
     Node *leftNode = parent->ptr[leftSibling];
-    if (leftNode->size >= (MAX + 1) / 2) {
+    if (leftNode->size >= (N + 1) / 2) {
       for (int i = cursor->size; i > 0; i--) {
         cursor->key[i] = cursor->key[i - 1];
       }
@@ -549,7 +551,7 @@ void BPlusTree::removeInternal(int x, Node *cursor, Node *child) {
   }
   if (rightSibling <= parent->size) {
     Node *rightNode = parent->ptr[rightSibling];
-    if (rightNode->size >= (MAX + 1) / 2) {
+    if (rightNode->size >= (N + 1) / 2) {
       cursor->key[cursor->size] = parent->key[pos];
       parent->key[pos] = rightNode->key[0];
       for (int i = 0; i < rightNode->size - 1; i++) {
@@ -614,6 +616,14 @@ void BPlusTree::search(int x) {
     for (int i = 0; i < cursor->size; i++) {
       if (cursor->key[i] == x) {
         cout << "Found\n";
+        int count = 0;
+        Node* buffer = cursor->ptr[i];
+        while(true){
+          count += buffer->size;
+          if(buffer->size == N) buffer = buffer->ptr[0];
+          else break;
+        }
+        cout << count << endl;
         return;
       }
     }
@@ -641,6 +651,9 @@ void BPlusTree::createTreeFromStorage(Storage *storage){
     //this stored the numVotes tof the current record in key_value
     // std::cout << storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size) << std::endl;
     //im assuming that x.key_value is supposed to store the numVotes of the current record
+    // if (storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size) == 2127){
+    //   break;
+    // }
     this->insert(storage->convertBytesToInt(curPtr+storage->tconst_size + storage->rating_size), curPtr);
     //INSERTION INTO THE BPLUSTREE CAN TAKE PLACE HERE
     // insert(x);
@@ -679,36 +692,96 @@ void BPlusTree::createTreeFromStorage(Storage *storage){
         //points to the first byte of the first record in the next block
         curPtr += storage->excess_block_size;
         block_no++;
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
   }
 }
 
-void BPlusTree::display(Node *cursor)
-{
-  if (cursor != NULL) 
-  {
-    for (int i = 0; i < cursor->size; i++) 
-    {
-      cout << cursor->key[i] << "|";
-    }
-    cout << "\n";
-    if (cursor->IS_LEAF != true) 
-    {
-      for (int i = 0; i < cursor->size + 1; i++) 
-      {
-        display(cursor->ptr[i]);
+void BPlusTree::displayRecords(Storage *storage){
+  //level order traversal
+  if (!root) {
+      return;
+  }
+  Node *cur = root;
+  while(!cur->IS_LEAF){
+      cur = cur->ptr[0];
+  }
+  while(cur != NULL){
+    for(int j = 0; j < cur->size; j++){
+      Node* buffer = cur->ptr[j];
+      while(true){
+        for(int i = 0; i < buffer->size; i++){
+          storage->display_record(buffer->records[i]);
+        }
+        if(buffer->size == N) buffer = buffer->ptr[0];
+        else break;
       }
     }
+    cur = cur->ptr[N];
+  }
+
+}
+
+void BPlusTree::display(){
+  //level order traversal
+  if (!root) {
+      return;
+  }
+
+  queue<Node *> q;
+  q.push(root);
+
+  int currentLevelNodes = 1;
+  int nextLevelNodes = 0;
+
+  while (!q.empty()) {
+      Node *node = q.front();
+      q.pop();
+      currentLevelNodes--;
+
+      for (int i = 0; i < node->size; i++) {
+          cout << node->key[i] << " ";
+      }
+      cout << ",";
+      if (!node->IS_LEAF) {
+          for (int i = 0; i < node->size + 1; i++) {
+              q.push(node->ptr[i]);
+              nextLevelNodes++;
+          }
+      }
+
+      if (currentLevelNodes == 0) {
+          cout << endl;  // print a new line for every layer
+          currentLevelNodes = nextLevelNodes;
+          nextLevelNodes = 0;
+      }
   }
 }
+// void BPlusTree::display(Node *cursor)
+// {
+//   if (cursor != NULL) 
+//   {
+//     for (int i = 0; i < cursor->size; i++) 
+//     {
+//       cout << cursor->key[i] << "|";
+//     }
+//     cout << "\n";
+//     if (cursor->IS_LEAF != true) 
+//     {
+//       for (int i = 0; i < cursor->size + 1; i++) 
+//       {
+//         display(cursor->ptr[i]);
+//       }
+//     }
+//   }
+// }
 
 // int main(){
 //   BPlusTree node;
-//   for(int i = 1; i <= 10; i++){
-//     node.insert(i);
-//     // node.insert(i);
-//   }
+  // for(int i = 1; i <= 10; i++){
+  //   node.insert(i);
+  //   // node.insert(i);
+  // }
 //   node.display(node.getRoot());
 //   // node.insert(4);
 //   // // node.display(node.getRoot());

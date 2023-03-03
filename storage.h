@@ -38,7 +38,7 @@ public:
     void test();
     
     //store data and complete experiment 1
-    void store_data();
+    void store_data(string file);
 
     //useful for experiment 3,4,5
     unsigned int retrieve_record_votes(unsigned char* curPtr);

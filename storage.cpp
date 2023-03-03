@@ -21,9 +21,9 @@ void Storage::test(){
     std::cout << "Testing" << std::endl;
 }
 
-void Storage::store_data() {
+void Storage::store_data(string file) {
     
-    std::ifstream movieData("data_small.tsv");
+    std::ifstream movieData(file);
     std::string line;
 
     string tconst;
