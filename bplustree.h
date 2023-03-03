@@ -47,5 +47,8 @@ public:
     void createTreeFromStorage(Storage *storage);
     Node* createNewLeafNode(int x, unsigned char *record);
     Node* createNewBufferNode(int x, unsigned char *record);
+
+    void experiment3(int x, Storage *storage);
+    void experiment4(int x, int y, Storage *storage);
 };
 #endif

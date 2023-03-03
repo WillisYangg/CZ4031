@@ -6,6 +6,8 @@
 #include <vector>
 #include "bplustree.h"
 #include <queue>
+#include <set>
+
 
 
 using namespace std;
@@ -629,6 +631,114 @@ void BPlusTree::search(int x) {
     }
     cout << "Not found\n";
   }
+}
+
+// Search operation
+void BPlusTree::experiment3(int x, Storage *storage) {
+  if (root == NULL) {
+    cout << "Tree is empty\n";
+  } else {
+    Node *cursor = root;
+    int nodes_accessed = 1;
+    set<int> blocks_accessed;
+    while (cursor->IS_LEAF == false) {
+      for (int i = 0; i < cursor->size; i++) {
+        if (x < cursor->key[i]) {
+          cursor = cursor->ptr[i];
+          break;
+        }
+        if (i == cursor->size - 1) {
+          cursor = cursor->ptr[i + 1];
+          break;
+        }
+      }
+      nodes_accessed++;
+    }
+    for (int i = 0; i < cursor->size; i++) {
+      if (cursor->key[i] == x) {
+        cout << "Found\n";
+        int count = 0;
+        Node* buffer = cursor->ptr[i];
+        float avg_avg_rating = 0;
+        while(true){
+          count += buffer->size;
+          for(int j = 0; j< buffer->size; j++){
+            blocks_accessed.insert(storage->retrieve_block_id(buffer->records[j]));
+            avg_avg_rating += (float)*(buffer->records[j]+storage->tconst_size)/10;
+          }
+          if(buffer->size == N) buffer = buffer->ptr[0];
+          else break;
+        }
+        avg_avg_rating /=count;
+        cout << "Index nodes accessed: " << nodes_accessed <<endl;
+        cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
+        cout << "Average of averageRatings: "<<avg_avg_rating << endl;
+        return;
+      }
+    }
+    cout << "Not found\n";
+  }
+}
+
+void BPlusTree::experiment4(int x, int y, Storage *storage){
+  int nodes_accessed = 1;
+  set<int> blocks_accessed;
+  int count = 0;
+  float avg_avg_rating = 0;
+  if (root == NULL) {
+    cout << "Tree is empty\n";
+  } else {
+    Node *cursor = root;
+    while (cursor->IS_LEAF == false) {
+      for (int i = 0; i < cursor->size; i++) {
+        if (x < cursor->key[i]) {
+          cursor = cursor->ptr[i];
+          break;
+        }
+        if (i == cursor->size - 1) {
+          cursor = cursor->ptr[i + 1];
+          break;
+        }
+      }
+      nodes_accessed++;
+    }
+    Node* temp;
+    int index;
+    for (int i = 0; i < cursor->size; i++) {
+      if (cursor->key[i] >= x) {
+        temp = cursor;
+        index = i;
+        break;
+      }
+    }
+    while(temp->key[index] <= y){
+      cout << "Found" << temp->key[index] << endl;
+      Node* buffer = temp->ptr[index];
+      while(true){
+        count += buffer->size;
+        for(int j = 0; j< buffer->size; j++){
+          blocks_accessed.insert(storage->retrieve_block_id(buffer->records[j]));
+          avg_avg_rating += (float)*(buffer->records[j]+storage->tconst_size)/10;
+        }
+        if(buffer->size == N) buffer = buffer->ptr[0];
+        else break;
+      }
+      
+      index++;
+
+      //jump to next leaf node
+      if(index == temp->size){
+        temp = temp->ptr[N];
+        index = 0;
+        if(temp->key[0] <= y) nodes_accessed++;
+      }
+    }
+  }
+
+  avg_avg_rating /=count;
+  cout << "Index nodes accessed: " << nodes_accessed <<endl;
+  cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
+  cout << "Average of averageRatings: "<<avg_avg_rating << endl;
 }
 
 void BPlusTree::createTreeFromStorage(Storage *storage){

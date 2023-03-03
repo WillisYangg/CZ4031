@@ -24,9 +24,10 @@ int main(){
     // BPlusTree* bplustree = new BPlusTree();
     BPlusTree bplustree;
     bplustree.createTreeFromStorage(storage);
-    std::cout << "testing" << std::endl;
+    std::cout << "Start Test" << std::endl;
     // bplustree.display();
     // bplustree.displayRecords(storage);
-    bplustree.search(500);
-    std::cout << "end test" << std::endl;
+    // bplustree.experiment3(500,storage);
+    bplustree.experiment4(30000,40000, storage);
+    std::cout << "End Test" << std::endl;
 }
