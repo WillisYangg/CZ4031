@@ -6,6 +6,8 @@
 #include <vector>
 #include "bplustree.h"
 #include <queue>
+#include <set>
+
 
 
 using namespace std;
@@ -53,7 +55,6 @@ Node* BPlusTree::createNewBufferNode(int x, unsigned char *record){
     return node;
 }
 //insert operation logic
-// void BPlusTree::insert(int x)
 void BPlusTree::insert(int x,unsigned char *record)
 {   
     // cout<<"Inserting "<< x <<" now\n";
@@ -62,6 +63,8 @@ void BPlusTree::insert(int x,unsigned char *record)
     {
         root = createNewLeafNode(x,record);
         cout<<"Root Node:  "<< x << endl;
+        this->nodes++;
+        this->levels++;
     }
     else
     {
@@ -144,6 +147,7 @@ void BPlusTree::insert(int x,unsigned char *record)
         else
         {
             cout<<"Leaf node has reached, creating new leaf node\n";
+            this->nodes++;
             //create new leaf node
             Node *newLeaf = new Node;
             int virtualNode[N+1];
@@ -203,6 +207,7 @@ void BPlusTree::insert(int x,unsigned char *record)
                 // cout<<"2\n";
                 //create a new root node
                 //tree grows upwards, form new root node
+                this->levels++;
                 Node *newRootNode = new Node();
                 newRootNode->key[0] = newLeaf->key[0];
                 newRootNode->ptr[0] = cursor;
@@ -256,6 +261,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
     {
         // cout<<"c\n";
         //create new internal node
+        this->nodes++;
         Node *newInternalNode = new Node();
         int virtualKey[N+1];
         Node *virtualPtr[N+2];
@@ -300,6 +306,8 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
         {
             // cout<<"d\n";
             //create a new root node
+            this->nodes++;
+            this->levels++;
             Node *newRootNode = new Node();
             newRootNode->key[0] = cursor->key[cursor->size];
             newRootNode->ptr[0] = cursor;
@@ -630,6 +638,124 @@ void BPlusTree::search(int x) {
     cout << "Not found\n";
   }
 }
+void BPlusTree::experiment2(){
+  cout<< "Parameter N: " << N <<endl;
+  cout<< "Number of Nodes: " << this->nodes <<endl;
+  cout<< "Number of Levels: " << this->levels<<endl;
+  cout<< "Keys of Root Node:" << endl;
+  if(root != NULL){
+    for(int i = 0; i < root->size; i++){
+      cout<<"Key "<< i<< ": "<<root->key[i]<< endl;
+    }
+  }
+}
+// Search operation
+void BPlusTree::experiment3(int x, Storage *storage) {
+  if (root == NULL) {
+    cout << "Tree is empty\n";
+  } else {
+    Node *cursor = root;
+    int nodes_accessed = 1;
+    set<int> blocks_accessed;
+    while (cursor->IS_LEAF == false) {
+      for (int i = 0; i < cursor->size; i++) {
+        if (x < cursor->key[i]) {
+          cursor = cursor->ptr[i];
+          break;
+        }
+        if (i == cursor->size - 1) {
+          cursor = cursor->ptr[i + 1];
+          break;
+        }
+      }
+      nodes_accessed++;
+    }
+    for (int i = 0; i < cursor->size; i++) {
+      if (cursor->key[i] == x) {
+        cout << "Found\n";
+        int count = 0;
+        Node* buffer = cursor->ptr[i];
+        float avg_avg_rating = 0;
+        while(true){
+          count += buffer->size;
+          for(int j = 0; j< buffer->size; j++){
+            blocks_accessed.insert(storage->retrieve_block_id(buffer->records[j]));
+            avg_avg_rating += (float)*(buffer->records[j]+storage->tconst_size)/10;
+          }
+          if(buffer->size == N) buffer = buffer->ptr[0];
+          else break;
+        }
+        avg_avg_rating /=count;
+        cout << "Index nodes accessed: " << nodes_accessed <<endl;
+        cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
+        cout << "Average of averageRatings: "<<avg_avg_rating << endl;
+        return;
+      }
+    }
+    cout << "Not found\n";
+  }
+}
+
+void BPlusTree::experiment4(int x, int y, Storage *storage){
+  int nodes_accessed = 1;
+  set<int> blocks_accessed;
+  int count = 0;
+  float avg_avg_rating = 0;
+  if (root == NULL) {
+    cout << "Tree is empty\n";
+  } else {
+    Node *cursor = root;
+    while (cursor->IS_LEAF == false) {
+      for (int i = 0; i < cursor->size; i++) {
+        if (x < cursor->key[i]) {
+          cursor = cursor->ptr[i];
+          break;
+        }
+        if (i == cursor->size - 1) {
+          cursor = cursor->ptr[i + 1];
+          break;
+        }
+      }
+      nodes_accessed++;
+    }
+    Node* temp;
+    int index;
+    for (int i = 0; i < cursor->size; i++) {
+      if (cursor->key[i] >= x) {
+        temp = cursor;
+        index = i;
+        break;
+      }
+    }
+    while(temp->key[index] <= y){
+      cout << "Found" << temp->key[index] << endl;
+      Node* buffer = temp->ptr[index];
+      while(true){
+        count += buffer->size;
+        for(int j = 0; j< buffer->size; j++){
+          blocks_accessed.insert(storage->retrieve_block_id(buffer->records[j]));
+          avg_avg_rating += (float)*(buffer->records[j]+storage->tconst_size)/10;
+        }
+        if(buffer->size == N) buffer = buffer->ptr[0];
+        else break;
+      }
+      
+      index++;
+
+      //jump to next leaf node
+      if(index == temp->size){
+        temp = temp->ptr[N];
+        index = 0;
+        if(temp->key[0] <= y) nodes_accessed++;
+      }
+    }
+  }
+
+  avg_avg_rating /=count;
+  cout << "Index nodes accessed: " << nodes_accessed <<endl;
+  cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
+  cout << "Average of averageRatings: "<<avg_avg_rating << endl;
+}
 
 void BPlusTree::createTreeFromStorage(Storage *storage){
   //iterate through records
@@ -757,48 +883,3 @@ void BPlusTree::display(){
       }
   }
 }
-// void BPlusTree::display(Node *cursor)
-// {
-//   if (cursor != NULL) 
-//   {
-//     for (int i = 0; i < cursor->size; i++) 
-//     {
-//       cout << cursor->key[i] << "|";
-//     }
-//     cout << "\n";
-//     if (cursor->IS_LEAF != true) 
-//     {
-//       for (int i = 0; i < cursor->size + 1; i++) 
-//       {
-//         display(cursor->ptr[i]);
-//       }
-//     }
-//   }
-// }
-
-// int main(){
-//   BPlusTree node;
-  // for(int i = 1; i <= 10; i++){
-  //   node.insert(i);
-  //   // node.insert(i);
-  // }
-//   node.display(node.getRoot());
-//   // node.insert(4);
-//   // // node.display(node.getRoot());
-//   // node.insert(15);
-//   // // node.display(node.getRoot());
-//   // node.insert(25);
-//   // // node.display(node.getRoot());
-//   // node.insert(35);
-//   // // node.display(node.getRoot());
-//   // node.insert(45);
-//   // node.display(node.getRoot());
-//   // node.insert(55);
-//   // node.display(node.getRoot());
-//   // node.insert(40);
-//   // node.display(node.getRoot());
-//   // node.insert(30);
-//   // node.display(node.getRoot());
-//   // node.insert(20);
-//   // node.display(node.getRoot());
-// }
