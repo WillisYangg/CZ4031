@@ -20,16 +20,17 @@ int main(){
     //storage->display_all_records();
     //std::cout << std::endl;
     //storage->experiment1();
+    //storage->experiment3(500);
+    storage->experiment4(30000,40000);
 
-    // BPlusTree* bplustree = new BPlusTree();
-    //BPlusTree bplustree;
-    //bplustree.createTreeFromStorage(storage);
-    //std::cout << "Start Test" << std::endl;
+    //BPlusTree* bplustree = new BPlusTree();
+    // BPlusTree bplustree;
+    // bplustree.createTreeFromStorage(storage);
+    // std::cout << "Start Test" << std::endl;
     // bplustree.display();
     // bplustree.displayRecords(storage);
     //bplustree.experiment2();
     //bplustree.experiment3(500,storage);
-    storage->experiment3(500);
     // bplustree.experiment4(30000,40000, storage);
-    //std::cout << "End Test" << std::endl;
+    // std::cout << "End Test" << std::endl;
 }

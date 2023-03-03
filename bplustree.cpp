@@ -709,6 +709,9 @@ void BPlusTree::experiment4(int x, int y, Storage *storage){
   set<int> blocks_accessed;
   int count = 0;
   float avg_avg_rating = 0;
+  
+  // Get starting timepoint
+  auto start = high_resolution_clock::now();
   if (root == NULL) {
     cout << "Tree is empty\n";
   } else {
@@ -760,9 +763,14 @@ void BPlusTree::experiment4(int x, int y, Storage *storage){
   }
 
   avg_avg_rating /=count;
+  // Get ending timepoint
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<microseconds>(stop - start);
+
   cout << "Index nodes accessed: " << nodes_accessed <<endl;
   cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
   cout << "Average of averageRatings: "<<avg_avg_rating << endl;
+  cout << "Runtime of retrieval process: " << duration.count() << "microseconds" << endl;
 }
 
 void BPlusTree::createTreeFromStorage(Storage *storage){

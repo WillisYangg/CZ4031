@@ -221,6 +221,58 @@ void Storage::experiment3(int x){
     cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
 }
 
+// brute force linear scan ranged search operation
+void Storage::experiment4(int x, int y){
+    unsigned char *curPtr = basePtr;
+    int block_no = 1;
+    int curRecord = 0; 
+    int reached = 0;
+    
+    // Get starting timepoint
+    auto start = high_resolution_clock::now();
+
+    // parse through if not x yet
+    while (retrieve_record_votes(curPtr) <= y ){
+        // storage ordered in terms of numVotes, parse through to check if x-1 has records of x
+        if (retrieve_record_votes(curPtr) == x-1){
+          curPtr += record_size;
+          curRecord++; 
+          if (curRecord%max_records_per_block == 0) {
+                curPtr += excess_block_size;
+                block_no++;
+                std::cout << std::endl;
+            }
+        }
+        // retrieve record ranging from x to y 
+        if (retrieve_record_votes(curPtr) >= x && retrieve_record_votes(curPtr) <= y){    
+            if (curRecord%max_records_per_block == 0 || reached == 0) std::cout << "Block: " << block_no << std::endl;
+            display_record(curPtr); 
+            curRecord++;
+            reached++;
+            curPtr += record_size;
+            // reached end of block, next block
+            if (curRecord%max_records_per_block == 0) {
+                curPtr += excess_block_size;
+                block_no++;
+                std::cout << std::endl;
+            }
+        }
+        // not in range, go to next block
+        else{
+            curPtr += block_size;
+            block_no++;
+        }
+    }
+    // Get ending timepoint
+    auto stop = high_resolution_clock::now();
+    // Get duration. Substart timepoints to
+    // get duration. To cast it to proper unit
+    // use duration cast method
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
+    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+}
+
 // int main(){
 //     Storage* storage = new Storage();
 //     storage->store_data();
