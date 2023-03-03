@@ -12,6 +12,9 @@
 #include <sstream>
 #include "storage.h"
 #include <fstream>
+#include <chrono>
+
+using namespace std::chrono;
 
 bool compareByNumVotes(const Record& a, const Record& b) {
     return a.numVotes < b.numVotes;
@@ -164,6 +167,58 @@ void Storage::experiment1(){
     std::cout<< "Record Size: " << record_size << "bytes" <<std::endl;
     std::cout<< "Number of Records in a Block: " << max_records_per_block << std::endl;
     std::cout<< "Number of Blocks: " << numBlocks << std::endl;
+}
+
+// brute force linear scan search operation
+void Storage::experiment3(int x){
+    unsigned char *curPtr = basePtr;
+    int block_no = 1;
+    int curRecord = 0; 
+    int reached = 0;
+    
+    // Get starting timepoint
+    auto start = high_resolution_clock::now();
+
+    // parse through if not x yet
+    while (retrieve_record_votes(curPtr) <= x){
+        // storage ordered in terms of numVotes, parse through to check if x-1 has records of x
+        if (retrieve_record_votes(curPtr) == x-1){
+          curPtr += record_size;
+          curRecord++; 
+          if (curRecord%max_records_per_block == 0) {
+                curPtr += excess_block_size;
+                block_no++;
+                std::cout << std::endl;
+            }
+        }
+        // retrieve record if x
+        if (retrieve_record_votes(curPtr) == x){    
+            if (curRecord%max_records_per_block == 0 || reached == 0) std::cout << "Block: " << block_no << std::endl;
+            display_record(curPtr); 
+            curRecord++;
+            reached++;
+            curPtr += record_size;
+            // reached end of block, next block
+            if (curRecord%max_records_per_block == 0) {
+                curPtr += excess_block_size;
+                block_no++;
+                std::cout << std::endl;
+            }
+        }
+        // not x, go to next block
+        else{
+            curPtr += block_size;
+            block_no++;
+        }
+    }
+    // Get ending timepoint
+    auto stop = high_resolution_clock::now();
+    // Get duration. Substart timepoints to
+    // get duration. To cast it to proper unit
+    // use duration cast method
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
+    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
 }
 
 // int main(){

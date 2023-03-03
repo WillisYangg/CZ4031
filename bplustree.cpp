@@ -7,10 +7,11 @@
 #include "bplustree.h"
 #include <queue>
 #include <set>
-
+#include <chrono>
 
 
 using namespace std;
+using namespace std::chrono;
 
 //size of node = size of block = 200
 //size of node = 2 +4N + 4 + 8(N+1)
@@ -651,6 +652,8 @@ void BPlusTree::experiment2(){
 }
 // Search operation
 void BPlusTree::experiment3(int x, Storage *storage) {
+  // Get starting timepoint
+  auto start = high_resolution_clock::now();
   if (root == NULL) {
     cout << "Tree is empty\n";
   } else {
@@ -686,9 +689,14 @@ void BPlusTree::experiment3(int x, Storage *storage) {
           else break;
         }
         avg_avg_rating /=count;
+        // Get ending timepoint
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+
         cout << "Index nodes accessed: " << nodes_accessed <<endl;
         cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
         cout << "Average of averageRatings: "<<avg_avg_rating << endl;
+        cout << "Runtime of retrieval process: " << duration.count() << "microseconds" << endl;
         return;
       }
     }
