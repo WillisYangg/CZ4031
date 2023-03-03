@@ -13,12 +13,6 @@
 #include "storage.h"
 #include <fstream>
 
-struct Record{
-    float rating;
-    int numVotes;
-    string tconst;
-};
-
 bool compareByNumVotes(const Record& a, const Record& b) {
     return a.numVotes < b.numVotes;
 }
@@ -27,9 +21,9 @@ void Storage::test(){
     std::cout << "Testing" << std::endl;
 }
 
-void Storage::store_data() {
+void Storage::store_data(string file) {
     
-    std::ifstream movieData("data.tsv");
+    std::ifstream movieData(file);
     std::string line;
 
     string tconst;
@@ -172,10 +166,10 @@ void Storage::experiment1(){
     std::cout<< "Number of Blocks: " << numBlocks << std::endl;
 }
 
-int main(){
-    Storage* storage = new Storage();
-    storage->store_data();
-    storage->display_all_records();
-    std::cout << std::endl;
-    storage->experiment1();
-}
+// int main(){
+//     Storage* storage = new Storage();
+//     storage->store_data();
+//     storage->display_all_records();
+//     std::cout << std::endl;
+//     storage->experiment1();
+// }
