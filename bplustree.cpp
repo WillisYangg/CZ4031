@@ -55,7 +55,6 @@ Node* BPlusTree::createNewBufferNode(int x, unsigned char *record){
     return node;
 }
 //insert operation logic
-// void BPlusTree::insert(int x)
 void BPlusTree::insert(int x,unsigned char *record)
 {   
     // cout<<"Inserting "<< x <<" now\n";
@@ -64,6 +63,8 @@ void BPlusTree::insert(int x,unsigned char *record)
     {
         root = createNewLeafNode(x,record);
         cout<<"Root Node:  "<< x << endl;
+        this->nodes++;
+        this->levels++;
     }
     else
     {
@@ -146,6 +147,7 @@ void BPlusTree::insert(int x,unsigned char *record)
         else
         {
             cout<<"Leaf node has reached, creating new leaf node\n";
+            this->nodes++;
             //create new leaf node
             Node *newLeaf = new Node;
             int virtualNode[N+1];
@@ -205,6 +207,7 @@ void BPlusTree::insert(int x,unsigned char *record)
                 // cout<<"2\n";
                 //create a new root node
                 //tree grows upwards, form new root node
+                this->levels++;
                 Node *newRootNode = new Node();
                 newRootNode->key[0] = newLeaf->key[0];
                 newRootNode->ptr[0] = cursor;
@@ -258,6 +261,7 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
     {
         // cout<<"c\n";
         //create new internal node
+        this->nodes++;
         Node *newInternalNode = new Node();
         int virtualKey[N+1];
         Node *virtualPtr[N+2];
@@ -302,6 +306,8 @@ void BPlusTree::insertInternal(int x, Node *cursor, Node *child)
         {
             // cout<<"d\n";
             //create a new root node
+            this->nodes++;
+            this->levels++;
             Node *newRootNode = new Node();
             newRootNode->key[0] = cursor->key[cursor->size];
             newRootNode->ptr[0] = cursor;
@@ -632,7 +638,17 @@ void BPlusTree::search(int x) {
     cout << "Not found\n";
   }
 }
-
+void BPlusTree::experiment2(){
+  cout<< "Parameter N: " << N <<endl;
+  cout<< "Number of Nodes: " << this->nodes <<endl;
+  cout<< "Number of Levels: " << this->levels<<endl;
+  cout<< "Keys of Root Node:" << endl;
+  if(root != NULL){
+    for(int i = 0; i < root->size; i++){
+      cout<<"Key "<< i<< ": "<<root->key[i]<< endl;
+    }
+  }
+}
 // Search operation
 void BPlusTree::experiment3(int x, Storage *storage) {
   if (root == NULL) {
@@ -867,48 +883,3 @@ void BPlusTree::display(){
       }
   }
 }
-// void BPlusTree::display(Node *cursor)
-// {
-//   if (cursor != NULL) 
-//   {
-//     for (int i = 0; i < cursor->size; i++) 
-//     {
-//       cout << cursor->key[i] << "|";
-//     }
-//     cout << "\n";
-//     if (cursor->IS_LEAF != true) 
-//     {
-//       for (int i = 0; i < cursor->size + 1; i++) 
-//       {
-//         display(cursor->ptr[i]);
-//       }
-//     }
-//   }
-// }
-
-// int main(){
-//   BPlusTree node;
-  // for(int i = 1; i <= 10; i++){
-  //   node.insert(i);
-  //   // node.insert(i);
-  // }
-//   node.display(node.getRoot());
-//   // node.insert(4);
-//   // // node.display(node.getRoot());
-//   // node.insert(15);
-//   // // node.display(node.getRoot());
-//   // node.insert(25);
-//   // // node.display(node.getRoot());
-//   // node.insert(35);
-//   // // node.display(node.getRoot());
-//   // node.insert(45);
-//   // node.display(node.getRoot());
-//   // node.insert(55);
-//   // node.display(node.getRoot());
-//   // node.insert(40);
-//   // node.display(node.getRoot());
-//   // node.insert(30);
-//   // node.display(node.getRoot());
-//   // node.insert(20);
-//   // node.display(node.getRoot());
-// }

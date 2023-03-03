@@ -31,6 +31,8 @@ public:
 
 class BPlusTree
 {
+    int nodes = 0;
+    int levels = 0;
     Node *root; //root node
     void insertInternal(int x, Node *, Node *);
     void removeInternal(int x, Node *, Node *);
@@ -48,6 +50,7 @@ public:
     Node* createNewLeafNode(int x, unsigned char *record);
     Node* createNewBufferNode(int x, unsigned char *record);
 
+    void experiment2();
     void experiment3(int x, Storage *storage);
     void experiment4(int x, int y, Storage *storage);
 };

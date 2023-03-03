@@ -27,7 +27,8 @@ int main(){
     std::cout << "Start Test" << std::endl;
     // bplustree.display();
     // bplustree.displayRecords(storage);
+    bplustree.experiment2();
     // bplustree.experiment3(500,storage);
-    bplustree.experiment4(30000,40000, storage);
+    // bplustree.experiment4(30000,40000, storage);
     std::cout << "End Test" << std::endl;
 }
