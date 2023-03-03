@@ -20,8 +20,8 @@ int main(){
     //storage->display_all_records();
     //std::cout << std::endl;
     //storage->experiment1();
-    //storage->experiment3(500);
-    storage->experiment4(30000,40000);
+    storage->experiment3(500);
+    //storage->experiment4(30000,40000);
 
     //BPlusTree* bplustree = new BPlusTree();
     // BPlusTree bplustree;
