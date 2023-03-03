@@ -232,17 +232,7 @@ void Storage::experiment4(int x, int y){
     auto start = high_resolution_clock::now();
 
     // parse through if not x yet
-    while (retrieve_record_votes(curPtr) <= y ){
-        // storage ordered in terms of numVotes, parse through to check if x-1 has records of x
-        if (retrieve_record_votes(curPtr) == x-1){
-          curPtr += record_size;
-          curRecord++; 
-          if (curRecord%max_records_per_block == 0) {
-                curPtr += excess_block_size;
-                block_no++;
-                std::cout << std::endl;
-            }
-        }
+    while (retrieve_record_votes(curPtr) <= y){
         // retrieve record ranging from x to y 
         if (retrieve_record_votes(curPtr) >= x && retrieve_record_votes(curPtr) <= y){    
             if (curRecord%max_records_per_block == 0 || reached == 0) std::cout << "Block: " << block_no << std::endl;
@@ -250,16 +240,15 @@ void Storage::experiment4(int x, int y){
             curRecord++;
             reached++;
             curPtr += record_size;
-            // reached end of block, next block
-            if (curRecord%max_records_per_block == 0) {
-                curPtr += excess_block_size;
-                block_no++;
-                std::cout << std::endl;
-            }
         }
-        // not in range, go to next block
+        // not in range, go to next record
         else{
-            curPtr += block_size;
+            curPtr += record_size;
+            curRecord++;
+        }
+        // reached end of block, next block
+        if (curRecord%max_records_per_block == 0) {
+            curPtr += excess_block_size;
             block_no++;
         }
     }
