@@ -22,6 +22,8 @@ class Node
     int *key;
     int size;
     Node **ptr;
+    //to point to records
+    unsigned char **records;
     friend class BPlusTree;
 public:
     Node();
@@ -37,10 +39,12 @@ class BPlusTree
 public:
     BPlusTree();
     void search(int x);
-    void insert(int x);
+    void insert(int x,unsigned char *record);
     void remove(int x);
     void display(Node *);
     Node* getRoot();
     void createTreeFromStorage(Storage *storage);
+    Node* createNewLeafNode(int x, unsigned char *record);
+    Node* createNewBufferNode(int x, unsigned char *record);
 };
 #endif
