@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <map>
-
-// #include <bits/stdc++.h>
 #include <cmath>
 #include <sstream>
 #include "storage.h"
