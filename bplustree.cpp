@@ -808,6 +808,36 @@ void BPlusTree::experiment4(int x, int y, Storage *storage)
   storage->experiment4(x, y);
 }
 
+void BPlusTree::experiment5(int x, Storage *storage)
+{
+  cout << "Experiment 5" << endl;
+  if (root == NULL)
+  {
+    cout << "Empty" << endl;
+    return;
+  }
+  // Get starting timepoint
+  auto start = chrono::high_resolution_clock::now();
+  remove(x);
+  
+  // Get ending timepoint
+  auto stop = chrono::high_resolution_clock::now();
+  auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+
+  cout << "Number of Nodes: " << this->nodes << endl;
+  cout << "Number of Levels: " << this->levels << endl;
+  cout << "Keys of Root Node:" << endl;
+  if (root != NULL)
+  {
+    for (int i = 0; i < root->size; i++)
+    {
+      cout << "Key " << i << ": " << root->key[i] << endl;
+    }
+  }
+  cout << "Runtime of retrieval process: " << duration.count() << "microseconds" << endl;
+  storage->experiment5(x);
+}
+
 void BPlusTree::createTreeFromStorage(Storage *storage)
 {
   // iterate through records

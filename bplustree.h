@@ -54,5 +54,6 @@ public:
     void experiment2();
     void experiment3(int x, Storage *storage);
     void experiment4(int x, int y, Storage *storage);
+    void experiment5(int x, Storage *storage);
 };
 #endif

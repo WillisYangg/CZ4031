@@ -35,7 +35,9 @@ int main(){
     bplustree.experiment3(500,storage);
     std::cout << std::endl;
     bplustree.experiment4(30000,40000, storage);
-    bplustree.remove(1000);
+    std::cout << std::endl;
+    // bplustree.remove(1000);
+    bplustree.experiment5(1000, storage);
     // bplustree.display();
     std::cout << "End Test" << std::endl;
 }
