@@ -390,6 +390,7 @@ void BPlusTree::deleteKey(int x)
           curNode->key[i] = curNode->key[i + 1];
           curNode->ptr[i] = curNode->ptr[i+1];
         }
+        this->numKeys--;
         curNode->size--;
         curNode->key[curNode->size] = 0;
         curNode->ptr[curNode->size] = NULL;
@@ -800,7 +801,7 @@ void BPlusTree::experiment5(int x, Storage *storage)
   }
   // Get starting timepoint
   auto start = chrono::high_resolution_clock::now();
-  remove(x);
+  deleteKey(x);
   
   // Get ending timepoint
   auto stop = chrono::high_resolution_clock::now();

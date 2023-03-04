@@ -3,7 +3,6 @@
 #include <vector>
 #include <stdio.h>
 #include <limits.h>
-// #include <bits/stdc++.h>
 #include <cmath>
 #include "storage.h"
 using namespace std;
