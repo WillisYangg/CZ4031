@@ -33,10 +33,11 @@ class BPlusTree
 {
     int nodes = 0;
     int levels = 0;
+    int numKeys = 0;
     Node *root; //root node
     void insertInternal(int x, Node *, Node *);
     void removeInternal(int x, Node *, Node *);
-    Node *findParent(Node *, Node *);
+    Node *findParent(Node* curNode, Node *child);
 
 public:
     BPlusTree();
@@ -45,10 +46,10 @@ public:
     void remove(int x);
     void display();
     void displayRecords(Storage *storage);
-    Node* getRoot();
     void createTreeFromStorage(Storage *storage);
     Node* createNewLeafNode(int x, unsigned char *record);
     Node* createNewBufferNode(int x, unsigned char *record);
+    Node** traverseToLeafNode(int x);
 
     void experiment2();
     void experiment3(int x, Storage *storage);
