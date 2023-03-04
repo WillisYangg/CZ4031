@@ -3,7 +3,6 @@
 #include <vector>
 #include <stdio.h>
 #include <limits.h>
-// #include <bits/stdc++.h>
 #include <cmath>
 using namespace std;
 #ifndef STORAGE_H
@@ -59,6 +58,7 @@ public:
     void experiment1();
     void experiment3(int x);
     void experiment4(int x, int y);
+    void experiment5(int x);
 };
 
 struct Record{

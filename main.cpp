@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <map>
-
-// #include <bits/stdc++.h>
 #include <cmath>
 #include <sstream>
 #include "storage.h"
@@ -17,12 +15,6 @@
 int main(){
     Storage* storage = new Storage();
     storage->store_data("data.tsv");
-    //storage->display_all_records();
-    //std::cout << std::endl;
-    
-    // storage->experiment3(500);
-    //storage->experiment4(30000,40000);
-
     BPlusTree bplustree;
     bplustree.createTreeFromStorage(storage);
     std::cout << "Start Test" << std::endl;
@@ -35,7 +27,8 @@ int main(){
     bplustree.experiment3(500,storage);
     std::cout << std::endl;
     bplustree.experiment4(30000,40000, storage);
-    bplustree.remove(1000);
+    std::cout << std::endl;
+    bplustree.experiment5(1000, storage);
     // bplustree.display();
     std::cout << "End Test" << std::endl;
 }

@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <map>
-
-// #include <bits/stdc++.h>
 #include <cmath>
 #include <sstream>
 #include "storage.h"
@@ -225,8 +223,8 @@ void Storage::experiment4(int x, int y){
     while (retrieve_record_votes(curPtr) <= y){
         // retrieve record ranging from x to y 
         if (retrieve_record_votes(curPtr) >= x && retrieve_record_votes(curPtr) <= y){    
-            // if (curRecord%max_records_per_block == 0 || reached == 0) cout << "Block: " << block_no << endl;
-            // display_record(curPtr); 
+            //if (curRecord%max_records_per_block == 0 || reached == 0) cout << "Block: " << block_no << endl;
+            //display_record(curPtr); 
             curRecord++;
             reached++;
             curPtr += record_size;
@@ -250,4 +248,44 @@ void Storage::experiment4(int x, int y){
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
     cout << "Runtime of linear scan: " << duration.count() << " microseconds" << endl;
+}
+
+void Storage::experiment5(int x){
+    unsigned char *curPtr = basePtr;
+    int block_no = 1;
+    int curRecord = 0; 
+
+    // Get starting timepoint
+    auto start = chrono::high_resolution_clock::now();
+
+    // parse through if not x yet
+    while (retrieve_record_votes(curPtr) <= x){
+        // reach records with numVotes == x and delete
+        if (retrieve_record_votes(curPtr) == x){    
+            // if (curRecord%max_records_per_block == 0 || reached == 0) cout << "Block: " << block_no << endl;
+            // display_record(curPtr); 
+            delete_record(curPtr);
+            curRecord++;
+            curPtr += record_size;
+        }
+        // not in range, go to next record
+        else{
+            curPtr += record_size;
+            curRecord++;
+        }
+        // reached end of block, next block
+        if (curRecord%max_records_per_block == 0) {
+            curPtr += excess_block_size;
+            block_no++;
+        }
+    }
+
+    // Get ending timepoint
+    auto stop = chrono::high_resolution_clock::now();
+    // Get duration. Substart timepoints to
+    // get duration. To cast it to proper unit
+    // use duration cast method
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+    cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
+    cout << "Runtime of linear scan for deletion: " << duration.count() << " microseconds" << endl;
 }

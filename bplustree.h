@@ -3,7 +3,6 @@
 #include <vector>
 #include <stdio.h>
 #include <limits.h>
-// #include <bits/stdc++.h>
 #include <cmath>
 #include "storage.h"
 using namespace std;
@@ -36,14 +35,14 @@ class BPlusTree
     int numKeys = 0;
     Node *root; //root node
     void insertInternal(int x, Node *, Node *);
-    void removeInternal(int x, Node *, Node *);
+    void deleteInternal(int x, Node *, Node *);
     Node *findParent(Node* curNode, Node *child);
 
 public:
     BPlusTree();
     void search(int x);
     void insert(int x,unsigned char *record);
-    void remove(int x);
+    void deleteKey(int x);
     void display();
     void displayRecords(Storage *storage);
     void createTreeFromStorage(Storage *storage);
@@ -54,5 +53,6 @@ public:
     void experiment2();
     void experiment3(int x, Storage *storage);
     void experiment4(int x, int y, Storage *storage);
+    void experiment5(int x, Storage *storage);
 };
 #endif
