@@ -18,39 +18,45 @@ using namespace std;
 const int N = (200 - 14) / 12;
 
 // Node() initialisation
-Node::Node(){
+Node::Node()
+{
   key = new int[N];
   ptr = new Node *[N + 1];
   records = new unsigned char *[N];
 };
 
 // BPlusTree() initialisation
-BPlusTree::BPlusTree(){
+BPlusTree::BPlusTree()
+{
   root = NULL;
 };
 
-Node *BPlusTree::createNewLeafNode(int x, unsigned char *record){
+Node *BPlusTree::createNewLeafNode(int x, unsigned char *record)
+{
   Node *node = new Node;
   node->key[0] = x;
   // node->records[0] = record;
   node->IS_LEAF = true;
   node->size = 1;
 
-  // elvis logic
   node->ptr[0] = createNewBufferNode(x, record);
   node->ptr[N] = NULL;
   return node;
 }
 
 // returns [Node* parentOfLeafNode, Node *leafNode]
-Node **BPlusTree::traverseToLeafNode(int x){
+Node **BPlusTree::traverseToLeafNode(int x)
+{
   Node **parent_child = new Node *[2];
   parent_child[1] = root;
   // To travel to the leaf node
-  while (parent_child[1]->IS_LEAF == false){
+  while (parent_child[1]->IS_LEAF == false)
+  {
     parent_child[0] = parent_child[1];
-    for (int i = 0; i < parent_child[1]->size; i++){
-      if (x < parent_child[1]->key[i]){
+    for (int i = 0; i < parent_child[1]->size; i++)
+    {
+      if (x < parent_child[1]->key[i])
+      {
         parent_child[1] = parent_child[1]->ptr[i];
         break;
       }
@@ -60,8 +66,8 @@ Node **BPlusTree::traverseToLeafNode(int x){
   }
   return parent_child;
 }
-Node *BPlusTree::createNewBufferNode(int x, unsigned char *record){
-  // elvis logic
+Node *BPlusTree::createNewBufferNode(int x, unsigned char *record)
+{
   Node *node = new Node;
   node->records[0] = record;
   node->size = 1;
@@ -70,27 +76,33 @@ Node *BPlusTree::createNewBufferNode(int x, unsigned char *record){
   return node;
 }
 // insert operation logic
-void BPlusTree::insert(int x, unsigned char *record){
+void BPlusTree::insert(int x, unsigned char *record)
+{
   // empty tree
-  if (root == NULL){
+  if (root == NULL)
+  {
     root = createNewLeafNode(x, record);
     cout << "First root node inserted:  " << x << endl;
     this->nodes++;
     this->levels++;
     this->numKeys++;
   }
-  else{
+  else
+  {
     Node *parent = traverseToLeafNode(x)[0];
     Node *curNode = traverseToLeafNode(x)[1];
     int insertIndex = 0;
-    while (x > curNode->key[insertIndex] && insertIndex < curNode->size){
+    while (x > curNode->key[insertIndex] && insertIndex < curNode->size)
+    {
       insertIndex++;
     }
     // account for duplicate keys
-    if (x == curNode->key[insertIndex]){
+    if (x == curNode->key[insertIndex])
+    {
       Node *curBuffer = curNode->ptr[insertIndex];
       // curBuffer should never be null in the first iteration
-      while (true){
+      while (true)
+      {
         if (curBuffer->ptr[0] != NULL)
           curBuffer = curBuffer->ptr[0];
         else
@@ -98,11 +110,13 @@ void BPlusTree::insert(int x, unsigned char *record){
       }
       int key_buffer_size = curBuffer->size;
       // there is remaining space in the buffer
-      if (key_buffer_size < N){
+      if (key_buffer_size < N)
+      {
         curBuffer->records[curBuffer->size] = record;
         curBuffer->size++;
       }
-      else{
+      else
+      {
         // current buffer is full
         // create new buffer to store the record
         // for simplicity sake
@@ -113,10 +127,12 @@ void BPlusTree::insert(int x, unsigned char *record){
       }
     }
     // sufficient space at leafnode
-    else if (curNode->size < N){
+    else if (curNode->size < N)
+    {
       this->numKeys++;
       // make space for new key
-      for (int i = curNode->size; i > insertIndex; i--){
+      for (int i = curNode->size; i > insertIndex; i--)
+      {
         curNode->key[i] = curNode->key[i - 1];
         curNode->ptr[i] = curNode->ptr[i - 1];
       }
@@ -126,10 +142,10 @@ void BPlusTree::insert(int x, unsigned char *record){
       Node *newBuffer = createNewBufferNode(x, record);
       curNode->ptr[insertIndex] = newBuffer;
       cout << "Inserted " << x << endl;
-      
     }
     // create a new leaf node if it is already at the max
-    else{
+    else
+    {
       cout << "Leaf node has reached, creating new leaf node\n";
       this->nodes++;
       this->numKeys++;
@@ -139,22 +155,27 @@ void BPlusTree::insert(int x, unsigned char *record){
       Node *buffers[N + 1];
 
       int insert_index = 0;
-      while (x > curNode->key[insert_index] && insert_index < curNode->size){
+      while (x > curNode->key[insert_index] && insert_index < curNode->size)
+      {
         insert_index++;
       }
 
-      for (int i = 0; i <= N; i++){
-        if (i < insert_index){
+      for (int i = 0; i <= N; i++)
+      {
+        if (i < insert_index)
+        {
           tempNode[i] = curNode->key[i];
           buffers[i] = curNode->ptr[i];
         }
-        else if (i == insert_index){
+        else if (i == insert_index)
+        {
           tempNode[i] = x;
           // create buffer for the new key
           Node *newBuffer = createNewBufferNode(x, record);
           buffers[i] = newBuffer;
         }
-        else{
+        else
+        {
           tempNode[i] = curNode->key[i - 1];
           buffers[i] = curNode->ptr[i - 1];
         }
@@ -169,17 +190,20 @@ void BPlusTree::insert(int x, unsigned char *record){
       newLeaf->ptr[N] = temp;
 
       // fill up the new leaf node
-      for (int i = 0; i < curNode->size; i++){
+      for (int i = 0; i < curNode->size; i++)
+      {
         curNode->key[i] = tempNode[i];
         curNode->ptr[i] = buffers[i];
-        if(i<newLeaf->size){
-          newLeaf->key[i] = tempNode[i+curNode->size];
-          newLeaf->ptr[i] = buffers[i+curNode->size];
+        if (i < newLeaf->size)
+        {
+          newLeaf->key[i] = tempNode[i + curNode->size];
+          newLeaf->ptr[i] = buffers[i + curNode->size];
         }
       }
       // cout<<"1\n";
       // tree only has one node (root node)
-      if (curNode == root){
+      if (curNode == root)
+      {
         // cout<<"2\n";
         this->levels++;
         Node *newRootNode = new Node();
@@ -190,7 +214,9 @@ void BPlusTree::insert(int x, unsigned char *record){
         newRootNode->size = 1;
         root = newRootNode;
         cout << "Inserted new root node successfully\n";
-      }else{
+      }
+      else
+      {
         // cout<<"3\n";
         // insert new key into parent node
         insertInternal(newLeaf->key[0], parent, newLeaf);
@@ -202,20 +228,27 @@ void BPlusTree::insert(int x, unsigned char *record){
 }
 
 // insertInternal operation logic
-void BPlusTree::insertInternal(int x, Node *parent, Node *child){
+void BPlusTree::insertInternal(int x, Node *parent, Node *child)
+{
   // parent is not full
   //  cout<<"a\n";
-  if (parent->size < N){
+  if (parent->size < N)
+  {
     // cout<<"b\n";
     int insertIndex = 0;
-    while (x > parent->key[insertIndex] && insertIndex < parent->size){
+    while (x > parent->key[insertIndex] && insertIndex < parent->size)
+    {
       insertIndex++;
     }
-    //make space for new key
-    for (int i = parent->size; i > insertIndex; i--){
-      if(i== parent->size+1) parent->ptr[i] = parent->ptr[i - 1];
-      else if(i== insertIndex+1) parent->key[i] = parent->key[i - 1];
-      else{
+    // make space for new key
+    for (int i = parent->size; i > insertIndex; i--)
+    {
+      if (i == parent->size + 1)
+        parent->ptr[i] = parent->ptr[i - 1];
+      else if (i == insertIndex + 1)
+        parent->key[i] = parent->key[i - 1];
+      else
+      {
         parent->ptr[i] = parent->ptr[i - 1];
         parent->key[i] = parent->key[i - 1];
       }
@@ -225,7 +258,8 @@ void BPlusTree::insertInternal(int x, Node *parent, Node *child){
     parent->size++;
     cout << "Inserted key into internal node successfully\n";
   }
-  else{
+  else
+  {
     // cout<<"c\n";
     // create new internal node
     this->nodes++;
@@ -233,22 +267,26 @@ void BPlusTree::insertInternal(int x, Node *parent, Node *child){
     int tempKey[N + 1];
     Node *tempPtr[N + 2];
     // store original in temp
-    for (int i = 0; i < N; i++){
+    for (int i = 0; i < N; i++)
+    {
       tempKey[i] = parent->key[i];
       tempPtr[i] = parent->ptr[i];
     }
     tempPtr[N] = parent->ptr[N];
     int insertIndex = 0;
-    while (x > tempKey[insertIndex] && insertIndex < N){
+    while (x > tempKey[insertIndex] && insertIndex < N)
+    {
       insertIndex++;
     }
 
-    //make space for new key
-    for (int i = N + 1; i > insertIndex; i--){
+    // make space for new key
+    for (int i = N + 1; i > insertIndex; i--)
+    {
       tempKey[i] = tempKey[i - 1];
     }
     tempKey[insertIndex] = x;
-    for (int i = N + 2; i > insertIndex; i--){
+    for (int i = N + 2; i > insertIndex; i--)
+    {
       tempPtr[i] = tempPtr[i - 1];
     }
     tempPtr[insertIndex + 1] = child;
@@ -256,13 +294,16 @@ void BPlusTree::insertInternal(int x, Node *parent, Node *child){
     parent->size = (N + 1) / 2;
     newInternalNode->size = N - parent->size;
     // fill up the new internal node
-    for (int i = 0, j = parent->size + 1; i < newInternalNode->size; i++, j++){
+    for (int i = 0, j = parent->size + 1; i < newInternalNode->size; i++, j++)
+    {
       newInternalNode->key[i] = tempKey[j];
     }
-    for (int i = 0, j = parent->size + 1; i < newInternalNode->size + 1; i++, j++){
+    for (int i = 0, j = parent->size + 1; i < newInternalNode->size + 1; i++, j++)
+    {
       newInternalNode->ptr[i] = tempPtr[j];
     }
-    if (parent == root){
+    if (parent == root)
+    {
       // cout<<"d\n";
       // create a new root node
       this->nodes++;
@@ -276,7 +317,8 @@ void BPlusTree::insertInternal(int x, Node *parent, Node *child){
       root = newRootNode;
       cout << "Inserted new root node successfully\n";
     }
-    else{
+    else
+    {
       // cout<<"e\n";
       insertInternal(parent->key[parent->size], findParent(root, parent), newInternalNode);
     }
@@ -284,169 +326,166 @@ void BPlusTree::insertInternal(int x, Node *parent, Node *child){
 }
 
 // findParent operation logic
-Node *BPlusTree::findParent(Node *curNode, Node *child){
-  //ignore first and second level as child is at least second level
-  //so the parent must at least be third level
-  if (curNode->IS_LEAF || (curNode->ptr[0]->IS_LEAF))return NULL;
-  for (int i = 0; i < curNode->size + 1; i++){
-    //found direct parent
-    if (curNode->ptr[i] == child)return curNode;
-    //check child of curNode to be parent of child
-    else{
+Node *BPlusTree::findParent(Node *curNode, Node *child)
+{
+  // ignore first and second level as child is at least second level
+  // so the parent must at least be third level
+  if (curNode->IS_LEAF || (curNode->ptr[0]->IS_LEAF))
+    return NULL;
+  for (int i = 0; i < curNode->size + 1; i++)
+  {
+    // found direct parent
+    if (curNode->ptr[i] == child)
+      return curNode;
+    // check child of curNode to be parent of child
+    else
+    {
       Node *parent = findParent(curNode->ptr[i], child);
-      if (parent != NULL) return parent;
+      if (parent != NULL)
+        return parent;
     }
   }
   return NULL;
 }
-
 
 // remove operational logic
 void BPlusTree::remove(int x)
 {
   if (root == NULL)
   {
-    cout << "Tree empty\n";
+    cout << "Empty" << endl;
   }
   else
   {
     Node *curNode = root;
     Node *parent;
-    int leftSibling, rightSibling;
+    int leftPtrIndex, rightPtrIndex;
     while (curNode->IS_LEAF == false)
     {
       for (int i = 0; i < curNode->size; i++)
       {
         parent = curNode;
-        leftSibling = i - 1;
-        rightSibling = i + 1;
+        
         if (x < curNode->key[i])
         {
+          leftPtrIndex = i - 1;
+          rightPtrIndex = i + 1;
           curNode = curNode->ptr[i];
           break;
         }
-        if (i == curNode->size - 1)
+      }
+      if(parent == curNode){
+        leftPtrIndex = curNode->size-1;
+        rightPtrIndex = curNode->size+1;
+        curNode = curNode->ptr[curNode->size];
+      }
+    }
+    int index;
+    for (index = 0; index < curNode->size; index++)
+    {
+      //found key
+      if (curNode->key[index] == x)
+      {
+        for (int i = index; i < curNode->size-1; i++)
         {
-          leftSibling = i;
-          rightSibling = i + 2;
-          curNode = curNode->ptr[i + 1];
-          break;
+          curNode->key[i] = curNode->key[i + 1];
+          curNode->ptr[i] = curNode->ptr[i+1];
         }
-      }
-    }
-    bool found = false;
-    int pos;
-    for (pos = 0; pos < curNode->size; pos++)
-    {
-      if (curNode->key[pos] == x)
-      {
-        found = true;
-        break;
-      }
-    }
-    if (!found)
-    {
-      cout << "Not found\n";
-      return;
-    }
-    for (int i = pos; i < curNode->size; i++)
-    {
-      curNode->key[i] = curNode->key[i + 1];
-    }
-    curNode->size--;
-    if (curNode == root)
-    {
-      for (int i = 0; i < N + 1; i++)
-      {
-        curNode->ptr[i] = NULL;
-      }
-      if (curNode->size == 0)
-      {
-        cout << "Tree died\n";
-        delete[] curNode->key;
-        delete[] curNode->ptr;
-        delete curNode;
-        root = NULL;
-      }
-      return;
-    }
-    curNode->ptr[curNode->size] = curNode->ptr[curNode->size + 1];
-    curNode->ptr[curNode->size + 1] = NULL;
-    if (curNode->size >= (N + 1) / 2)
-    {
-      return;
-    }
-    if (leftSibling >= 0)
-    {
-      Node *leftNode = parent->ptr[leftSibling];
-      if (leftNode->size >= (N + 1) / 2 + 1)
-      {
-        for (int i = curNode->size; i > 0; i--)
+        curNode->size--;
+        curNode->key[curNode->size] = 0;
+        curNode->ptr[curNode->size] = NULL;
+
+        //if leafnode has less than minimum size
+        if (curNode->size < (N + 1) / 2)
         {
-          curNode->key[i] = curNode->key[i - 1];
+          //check left leafnode to take a key
+          if (leftPtrIndex >= 0)
+          {
+            Node *leftNode = parent->ptr[leftPtrIndex];
+            //leftNode has more than minimum keys
+            if (leftNode->size >= ((N + 1)/2) + 1)
+            {
+              for (int i = curNode->size; i > 0; i--)
+              {
+                curNode->key[i] = curNode->key[i - 1];
+                curNode->ptr[i] = curNode->ptr[i-1];
+              }
+              curNode->size++;
+              curNode->key[0] = leftNode->key[leftNode->size - 1];
+              curNode->ptr[0] = leftNode->ptr[leftNode->size -1];
+              leftNode->ptr[leftNode->size-1] = NULL;
+              leftNode->key[leftNode->size-1] = 0;
+              leftNode->size--;
+              //update the parent key to new curNode->key[0]
+              parent->key[leftPtrIndex] = curNode->key[0];
+              return;
+            }
+          }
+          //check right leafnode to take a key
+          if (rightPtrIndex <= parent->size)
+          {
+            Node *rightNode = parent->ptr[rightPtrIndex];
+            //right node has more than minimum keys
+            if (rightNode->size >= ((N + 1)/2) + 1)
+            {
+              curNode->ptr[curNode->size] = rightNode->ptr[0];
+              curNode->key[curNode->size] = rightNode->key[0];
+              curNode->size++;
+              rightNode->size--;
+              //remove the taken key
+              for (int i = 0; i < rightNode->size; i++)
+              {
+                rightNode->key[i] = rightNode->key[i+1];
+                rightNode->ptr[i] = rightNode->ptr[i+1];
+              }
+              rightNode->key[rightNode->size] = 0;
+              rightNode->ptr[rightNode->size] = NULL;
+              parent->key[rightPtrIndex - 1] = rightNode->key[0];
+              return;
+            }
+          }
+          //code reaches here if there is no excess keys from both
+          //left and right leafnodes
+          //merge with left leafnode
+          if (leftPtrIndex >= 0)
+          {
+            Node *leftNode = parent->ptr[leftPtrIndex];
+            for (int i = leftNode->size, j = 0; j < curNode->size; i++, j++)
+            {
+              leftNode->key[i] = curNode->key[j];
+              leftNode->ptr[i] = curNode->ptr[j];
+            }
+            leftNode->size += curNode->size;
+            leftNode->ptr[N] = curNode->ptr[N];
+            removeInternal(parent->key[leftPtrIndex], parent, curNode);
+            delete[] curNode->key;
+            delete[] curNode->ptr;
+            delete curNode;
+            this->nodes--;
+          }
+          //merge with right leafnode
+          else if (rightPtrIndex <= parent->size)
+          {
+            Node *rightNode = parent->ptr[rightPtrIndex];
+            for (int i = curNode->size, j = 0; j < rightNode->size; i++, j++)
+            {
+              curNode->key[i] = rightNode->key[j];
+              curNode->ptr[i] = rightNode->ptr[j];
+            }
+            curNode->size += rightNode->size;
+            curNode->ptr[N] = rightNode->ptr[N];
+            // cout << "Merging two leaf nodes\n";
+            removeInternal(parent->key[rightPtrIndex - 1], parent, rightNode);
+            delete[] rightNode->key;
+            delete[] rightNode->ptr;
+            delete rightNode;
+            this->nodes--;
+          }
         }
-        curNode->size++;
-        curNode->ptr[curNode->size] = curNode->ptr[curNode->size - 1];
-        curNode->ptr[curNode->size - 1] = NULL;
-        curNode->key[0] = leftNode->key[leftNode->size - 1];
-        leftNode->size--;
-        leftNode->ptr[leftNode->size] = curNode;
-        leftNode->ptr[leftNode->size + 1] = NULL;
-        parent->key[leftSibling] = curNode->key[0];
         return;
       }
     }
-    if (rightSibling <= parent->size)
-    {
-      Node *rightNode = parent->ptr[rightSibling];
-      if (rightNode->size >= (N + 1) / 2 + 1)
-      {
-        curNode->size++;
-        curNode->ptr[curNode->size] = curNode->ptr[curNode->size - 1];
-        curNode->ptr[curNode->size - 1] = NULL;
-        curNode->key[curNode->size - 1] = rightNode->key[0];
-        rightNode->size--;
-        rightNode->ptr[rightNode->size] = rightNode->ptr[rightNode->size + 1];
-        rightNode->ptr[rightNode->size + 1] = NULL;
-        for (int i = 0; i < rightNode->size; i++)
-        {
-          rightNode->key[i] = rightNode->key[i + 1];
-        }
-        parent->key[rightSibling - 1] = rightNode->key[0];
-        return;
-      }
-    }
-    if (leftSibling >= 0)
-    {
-      Node *leftNode = parent->ptr[leftSibling];
-      for (int i = leftNode->size, j = 0; j < curNode->size; i++, j++)
-      {
-        leftNode->key[i] = curNode->key[j];
-      }
-      leftNode->ptr[leftNode->size] = NULL;
-      leftNode->size += curNode->size;
-      leftNode->ptr[leftNode->size] = curNode->ptr[curNode->size];
-      removeInternal(parent->key[leftSibling], parent, curNode);
-      delete[] curNode->key;
-      delete[] curNode->ptr;
-      delete curNode;
-    }
-    else if (rightSibling <= parent->size)
-    {
-      Node *rightNode = parent->ptr[rightSibling];
-      for (int i = curNode->size, j = 0; j < rightNode->size; i++, j++)
-      {
-        curNode->key[i] = rightNode->key[j];
-      }
-      curNode->ptr[curNode->size] = NULL;
-      curNode->size += rightNode->size;
-      curNode->ptr[curNode->size] = rightNode->ptr[rightNode->size];
-      cout << "Merging two leaf nodes\n";
-      removeInternal(parent->key[rightSibling - 1], parent, rightNode);
-      delete[] rightNode->key;
-      delete[] rightNode->ptr;
-      delete rightNode;
-    }
+    cout << "Not found" << endl;
   }
 }
 
@@ -483,26 +522,26 @@ void BPlusTree::removeInternal(int x, Node *curNode, Node *child)
       }
     }
   }
-  int pos;
-  for (pos = 0; pos < curNode->size; pos++)
+  int index;
+  for (index = 0; index < curNode->size; index++)
   {
-    if (curNode->key[pos] == x)
+    if (curNode->key[index] == x)
     {
       break;
     }
   }
-  for (int i = pos; i < curNode->size; i++)
+  for (int i = index; i < curNode->size; i++)
   {
     curNode->key[i] = curNode->key[i + 1];
   }
-  for (pos = 0; pos < curNode->size + 1; pos++)
+  for (index = 0; index < curNode->size + 1; index++)
   {
-    if (curNode->ptr[pos] == child)
+    if (curNode->ptr[index] == child)
     {
       break;
     }
   }
-  for (int i = pos; i < curNode->size + 1; i++)
+  for (int i = index; i < curNode->size + 1; i++)
   {
     curNode->ptr[i] = curNode->ptr[i + 1];
   }
@@ -514,27 +553,27 @@ void BPlusTree::removeInternal(int x, Node *curNode, Node *child)
   if (curNode == root)
     return;
   Node *parent = findParent(root, curNode);
-  int leftSibling, rightSibling;
-  for (pos = 0; pos < parent->size + 1; pos++)
+  int leftPtrIndex, rightPtrIndex;
+  for (index = 0; index < parent->size + 1; index++)
   {
-    if (parent->ptr[pos] == curNode)
+    if (parent->ptr[index] == curNode)
     {
-      leftSibling = pos - 1;
-      rightSibling = pos + 1;
+      leftPtrIndex = index - 1;
+      rightPtrIndex = index + 1;
       break;
     }
   }
-  if (leftSibling >= 0)
+  if (leftPtrIndex >= 0)
   {
-    Node *leftNode = parent->ptr[leftSibling];
+    Node *leftNode = parent->ptr[leftPtrIndex];
     if (leftNode->size >= (N + 1) / 2)
     {
       for (int i = curNode->size; i > 0; i--)
       {
         curNode->key[i] = curNode->key[i - 1];
       }
-      curNode->key[0] = parent->key[leftSibling];
-      parent->key[leftSibling] = leftNode->key[leftNode->size - 1];
+      curNode->key[0] = parent->key[leftPtrIndex];
+      parent->key[leftPtrIndex] = leftNode->key[leftNode->size - 1];
       for (int i = curNode->size + 1; i > 0; i--)
       {
         curNode->ptr[i] = curNode->ptr[i - 1];
@@ -545,13 +584,13 @@ void BPlusTree::removeInternal(int x, Node *curNode, Node *child)
       return;
     }
   }
-  if (rightSibling <= parent->size)
+  if (rightPtrIndex <= parent->size)
   {
-    Node *rightNode = parent->ptr[rightSibling];
+    Node *rightNode = parent->ptr[rightPtrIndex];
     if (rightNode->size >= (N + 1) / 2)
     {
-      curNode->key[curNode->size] = parent->key[pos];
-      parent->key[pos] = rightNode->key[0];
+      curNode->key[curNode->size] = parent->key[index];
+      parent->key[index] = rightNode->key[0];
       for (int i = 0; i < rightNode->size - 1; i++)
       {
         rightNode->key[i] = rightNode->key[i + 1];
@@ -566,10 +605,10 @@ void BPlusTree::removeInternal(int x, Node *curNode, Node *child)
       return;
     }
   }
-  if (leftSibling >= 0)
+  if (leftPtrIndex >= 0)
   {
-    Node *leftNode = parent->ptr[leftSibling];
-    leftNode->key[leftNode->size] = parent->key[leftSibling];
+    Node *leftNode = parent->ptr[leftPtrIndex];
+    leftNode->key[leftNode->size] = parent->key[leftPtrIndex];
     for (int i = leftNode->size + 1, j = 0; j < curNode->size; j++)
     {
       leftNode->key[i] = curNode->key[j];
@@ -581,12 +620,12 @@ void BPlusTree::removeInternal(int x, Node *curNode, Node *child)
     }
     leftNode->size += curNode->size + 1;
     curNode->size = 0;
-    removeInternal(parent->key[leftSibling], parent, curNode);
+    removeInternal(parent->key[leftPtrIndex], parent, curNode);
   }
-  else if (rightSibling <= parent->size)
+  else if (rightPtrIndex <= parent->size)
   {
-    Node *rightNode = parent->ptr[rightSibling];
-    curNode->key[curNode->size] = parent->key[rightSibling - 1];
+    Node *rightNode = parent->ptr[rightPtrIndex];
+    curNode->key[curNode->size] = parent->key[rightPtrIndex - 1];
     for (int i = curNode->size + 1, j = 0; j < rightNode->size; j++)
     {
       curNode->key[i] = rightNode->key[j];
@@ -598,7 +637,7 @@ void BPlusTree::removeInternal(int x, Node *curNode, Node *child)
     }
     curNode->size += rightNode->size + 1;
     rightNode->size = 0;
-    removeInternal(parent->key[rightSibling - 1], parent, rightNode);
+    removeInternal(parent->key[rightPtrIndex - 1], parent, rightNode);
   }
 }
 
@@ -607,48 +646,30 @@ void BPlusTree::search(int x)
 {
   if (root == NULL)
   {
-    cout << "Tree is empty\n";
+    cout << "Empty";
+    return;
   }
-  else
+  Node *curNode = traverseToLeafNode(x)[1];
+  for (int i = 0; i < curNode->size; i++)
   {
-    Node *curNode = root;
-    while (curNode->IS_LEAF == false)
+    if (curNode->key[i] == x)
     {
-      for (int i = 0; i < curNode->size; i++)
+      cout << "Found" << endl;
+      int count = 0;
+      Node *buffer = curNode->ptr[i];
+      while (true)
       {
-        if (x < curNode->key[i])
-        {
-          curNode = curNode->ptr[i];
+        count += buffer->size;
+        if (buffer->size == N)
+          buffer = buffer->ptr[0];
+        else
           break;
-        }
-        if (i == curNode->size - 1)
-        {
-          curNode = curNode->ptr[i + 1];
-          break;
-        }
       }
+      cout << count << endl;
+      return;
     }
-    for (int i = 0; i < curNode->size; i++)
-    {
-      if (curNode->key[i] == x)
-      {
-        cout << "Found\n";
-        int count = 0;
-        Node *buffer = curNode->ptr[i];
-        while (true)
-        {
-          count += buffer->size;
-          if (buffer->size == N)
-            buffer = buffer->ptr[0];
-          else
-            break;
-        }
-        cout << count << endl;
-        return;
-      }
-    }
-    cout << "Not found\n";
   }
+  cout << "Not found\n";
 }
 void BPlusTree::experiment2()
 {
@@ -670,121 +691,25 @@ void BPlusTree::experiment2()
 void BPlusTree::experiment3(int x, Storage *storage)
 {
   cout << "Experiment 3" << endl;
-  // Get starting timepoint
-  auto start = chrono::high_resolution_clock::now();
   if (root == NULL)
   {
-    cout << "Tree is empty\n";
+    cout << "Empty" << endl;
+    return;
   }
-  else
-  {
-    Node *curNode = root;
-    int nodes_accessed = 1;
-    set<int> blocks_accessed;
-    while (curNode->IS_LEAF == false)
-    {
-      for (int i = 0; i < curNode->size; i++)
-      {
-        if (x < curNode->key[i])
-        {
-          curNode = curNode->ptr[i];
-          break;
-        }
-        if (i == curNode->size - 1)
-        {
-          curNode = curNode->ptr[i + 1];
-          break;
-        }
-      }
-      nodes_accessed++;
-    }
-    for (int i = 0; i < curNode->size; i++)
-    {
-      if (curNode->key[i] == x)
-      {
-        // cout << "Found\n";
-        int count = 0;
-        Node *buffer = curNode->ptr[i];
-        float avg_avg_rating = 0;
-        while (true)
-        {
-          count += buffer->size;
-          for (int j = 0; j < buffer->size; j++)
-          {
-            blocks_accessed.insert(storage->retrieve_block_id(buffer->records[j]));
-            avg_avg_rating += (float)*(buffer->records[j] + storage->tconst_size) / 10;
-          }
-          if (buffer->size == N)
-            buffer = buffer->ptr[0];
-          else
-            break;
-        }
-        avg_avg_rating /= count;
-        // Get ending timepoint
-        auto stop = chrono::high_resolution_clock::now();
-        auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-
-        cout << "Index nodes accessed: " << nodes_accessed << endl;
-        cout << "Number of data blocks accessed: " << blocks_accessed.size() << endl;
-        cout << "Average of averageRatings: " << avg_avg_rating << endl;
-        cout << "Runtime of retrieval process: " << duration.count() << "microseconds" << endl;
-        storage->experiment3(x);
-        return;
-      }
-    }
-    cout << "Not found\n";
-  }
-}
-
-void BPlusTree::experiment4(int x, int y, Storage *storage)
-{
-  cout << "Experiment 4" << endl;
-  int nodes_accessed = 1;
+  // Get starting timepoint
+  auto start = chrono::high_resolution_clock::now();
+  // it is at least the number of levels
+  int nodes_accessed = this->levels;
   set<int> blocks_accessed;
-  int count = 0;
-  float avg_avg_rating = 0;
-
-  // Get starting timepoint
-  auto start = chrono::high_resolution_clock::now();
-  if (root == NULL)
+  Node *curNode = traverseToLeafNode(x)[1];
+  for (int i = 0; i < curNode->size; i++)
   {
-    cout << "Tree is empty\n";
-  }
-  else
-  {
-    Node *curNode = root;
-    while (curNode->IS_LEAF == false)
+    if (curNode->key[i] == x)
     {
-      for (int i = 0; i < curNode->size; i++)
-      {
-        if (x < curNode->key[i])
-        {
-          curNode = curNode->ptr[i];
-          break;
-        }
-        if (i == curNode->size - 1)
-        {
-          curNode = curNode->ptr[i + 1];
-          break;
-        }
-      }
-      nodes_accessed++;
-    }
-    Node *temp;
-    int index;
-    for (int i = 0; i < curNode->size; i++)
-    {
-      if (curNode->key[i] >= x)
-      {
-        temp = curNode;
-        index = i;
-        break;
-      }
-    }
-    while (temp->key[index] <= y)
-    {
-      // cout << "Found" << temp->key[index] << endl;
-      Node *buffer = temp->ptr[index];
+      // cout << "Found\n";
+      int count = 0;
+      Node *buffer = curNode->ptr[i];
+      float avg_avg_rating = 0;
       while (true)
       {
         count += buffer->size;
@@ -798,17 +723,76 @@ void BPlusTree::experiment4(int x, int y, Storage *storage)
         else
           break;
       }
+      avg_avg_rating /= count;
+      // Get ending timepoint
+      auto stop = chrono::high_resolution_clock::now();
+      auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
 
-      index++;
+      cout << "Index nodes accessed: " << nodes_accessed << endl;
+      cout << "Number of data blocks accessed: " << blocks_accessed.size() << endl;
+      cout << "Average of averageRatings: " << avg_avg_rating << endl;
+      cout << "Runtime of retrieval process: " << duration.count() << "microseconds" << endl;
+      storage->experiment3(x);
+      return;
+    }
+  }
+  cout << "Not found\n";
+}
 
-      // jump to next leaf node
-      if (index == temp->size)
+void BPlusTree::experiment4(int x, int y, Storage *storage)
+{
+  cout << "Experiment 4" << endl;
+  if (root == NULL)
+  {
+    cout << "Empty";
+    return;
+  }
+  int nodes_accessed = this->levels;
+  set<int> blocks_accessed;
+  int count = 0;
+  float avg_avg_rating = 0;
+
+  // Get starting timepoint
+  auto start = chrono::high_resolution_clock::now();
+  Node *curNode = traverseToLeafNode(x)[1];
+  Node *temp;
+  int index;
+  for (int i = 0; i < curNode->size; i++)
+  {
+    if (curNode->key[i] >= x)
+    {
+      temp = curNode;
+      index = i;
+      break;
+    }
+  }
+  while (temp->key[index] <= y)
+  {
+    // cout << "Found" << temp->key[index] << endl;
+    Node *buffer = temp->ptr[index];
+    while (true)
+    {
+      count += buffer->size;
+      for (int j = 0; j < buffer->size; j++)
       {
-        temp = temp->ptr[N];
-        index = 0;
-        if (temp->key[0] <= y)
-          nodes_accessed++;
+        blocks_accessed.insert(storage->retrieve_block_id(buffer->records[j]));
+        avg_avg_rating += (float)*(buffer->records[j] + storage->tconst_size) / 10;
       }
+      if (buffer->size == N)
+        buffer = buffer->ptr[0];
+      else
+        break;
+    }
+
+    index++;
+
+    // jump to next leaf node
+    if (index == temp->size)
+    {
+      temp = temp->ptr[N];
+      index = 0;
+      if (temp->key[0] <= y)
+        nodes_accessed++;
     }
   }
 
