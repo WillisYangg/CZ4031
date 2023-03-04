@@ -36,14 +36,14 @@ class BPlusTree
     int numKeys = 0;
     Node *root; //root node
     void insertInternal(int x, Node *, Node *);
-    void removeInternal(int x, Node *, Node *);
+    void deleteInternal(int x, Node *, Node *);
     Node *findParent(Node* curNode, Node *child);
 
 public:
     BPlusTree();
     void search(int x);
     void insert(int x,unsigned char *record);
-    void remove(int x);
+    void deleteKey(int x);
     void display();
     void displayRecords(Storage *storage);
     void createTreeFromStorage(Storage *storage);
