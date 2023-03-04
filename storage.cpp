@@ -14,44 +14,44 @@
 #include <fstream>
 #include <chrono>
 
-using namespace std::chrono;
+using namespace std;
 
 bool compareByNumVotes(const Record& a, const Record& b) {
     return a.numVotes < b.numVotes;
 }
 
 void Storage::test(){
-    std::cout << "Testing" << std::endl;
+    cout << "Testing" << endl;
 }
 
 void Storage::store_data(string file) {
     
-    std::ifstream movieData(file);
-    std::string line;
+    ifstream movieData(file);
+    string line;
 
     string tconst;
     string rating;
     string numVotes;
     float rating_float;
-    std::vector<Record> records;
+    vector<Record> records;
     unsigned char record[record_size];
     unsigned char *curPtr = basePtr;
     this->numBlocks = 1;
-    std::map<unsigned char *, unsigned int> map;
+    map<unsigned char *, unsigned int> map;
     int no_of_records_in_block = 0;
 
     // skip first row
     getline(movieData, line);
     // read line by line
-    while (std::getline(movieData, line)) {
+    while (getline(movieData, line)) {
         Record record_obj;
-        std::istringstream ss(line);
+        istringstream ss(line);
         // read each element by delimiter
-        std::getline(ss, tconst, '\t');
-        std::getline(ss, rating, '\t');
-        std::getline(ss, numVotes, '\t');
+        getline(ss, tconst, '\t');
+        getline(ss, rating, '\t');
+        getline(ss, numVotes, '\t');
 
-        std::stringstream(rating) >> rating_float;
+        stringstream(rating) >> rating_float;
         record_obj.tconst = tconst;
         // rating is now an integer that is  out of 100 instead of out of 10
         //since 100 < 256, it can be stored in 1byte
@@ -59,7 +59,7 @@ void Storage::store_data(string file) {
         record_obj.numVotes = stoi(numVotes);
         records.push_back(record_obj);
     }
-    std::sort(records.begin(), records.end(), compareByNumVotes);
+    sort(records.begin(), records.end(), compareByNumVotes);
     for(Record record_obj : records){
         // check if block has space, if not move on to the next block
         if (no_of_records_in_block == max_records_per_block) {
@@ -131,16 +131,16 @@ unsigned int Storage::convertBytesToInt(unsigned char * bytes){
 
 
 void Storage::display_record(unsigned char* curPtr){
-    if(*curPtr == '\0') std::cout << "Record does not exist" << std::endl;
+    if(*curPtr == '\0') cout << "Record does not exist" << endl;
     else{
         for(int i = 0; i< tconst_size;i++){
-            if(*curPtr != '\0') std::cout << *curPtr;
+            if(*curPtr != '\0') cout << *curPtr;
             curPtr++;
         }
-        std::cout <<"\t";
-        std::cout << (float)*curPtr/10 << "\t";
+        cout <<"\t";
+        cout << (float)*curPtr/10 << "\t";
         curPtr++;
-        std::cout << convertBytesToInt(curPtr) << std::endl;
+        cout << convertBytesToInt(curPtr) << endl;
         curPtr+=4;
     }
 }
@@ -150,23 +150,24 @@ void Storage::display_all_records(){
     int curRecord = 0;
     int block_no = 1;
     while(curRecord < numRecords){
-        if (curRecord%max_records_per_block == 0) std::cout << "Block: " << block_no << std::endl;
+        if (curRecord%max_records_per_block == 0) cout << "Block: " << block_no << endl;
         display_record(curPtr);
         curRecord++;
         curPtr +=record_size;
         if (curRecord%max_records_per_block == 0) {
             curPtr += excess_block_size;
             block_no++;
-            std::cout << std::endl;
+            cout << endl;
         }
     }
 }
 
 void Storage::experiment1(){
-    std::cout<< "Number of Records: " << numRecords << std::endl;
-    std::cout<< "Record Size: " << record_size << "bytes" <<std::endl;
-    std::cout<< "Number of Records in a Block: " << max_records_per_block << std::endl;
-    std::cout<< "Number of Blocks: " << numBlocks << std::endl;
+    cout<< "Experiment 1" << endl;
+    cout<< "Number of Records: " << numRecords << endl;
+    cout<< "Record Size: " << record_size << "bytes" <<endl;
+    cout<< "Number of Records in a Block: " << max_records_per_block << endl;
+    cout<< "Number of Blocks: " << numBlocks << endl;
 }
 
 // brute force linear scan search operation
@@ -177,14 +178,14 @@ void Storage::experiment3(int x){
     int reached = 0;
     
     // Get starting timepoint
-    auto start = high_resolution_clock::now();
+    auto start = chrono::high_resolution_clock::now();
 
     // parse through if not x yet
     while (retrieve_record_votes(curPtr) <= x){
         // retrieve record if x
         if (retrieve_record_votes(curPtr) == x){    
-            if (curRecord%max_records_per_block == 0 || reached == 0) std::cout << "Block: " << block_no << std::endl;
-            display_record(curPtr); 
+            // if (curRecord%max_records_per_block == 0 || reached == 0) cout << "Block: " << block_no << endl;
+            // display_record(curPtr); 
             curRecord++;
             reached++;
             curPtr += record_size;
@@ -201,13 +202,13 @@ void Storage::experiment3(int x){
         }
     }
     // Get ending timepoint
-    auto stop = high_resolution_clock::now();
+    auto stop = chrono::high_resolution_clock::now();
     // Get duration. Substart timepoints to
     // get duration. To cast it to proper unit
     // use duration cast method
-    auto duration = duration_cast<microseconds>(stop - start);
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
-    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+    cout << "Runtime of linear scan: " << duration.count() << " microseconds" << endl;
 }
 
 // brute force linear scan ranged search operation
@@ -218,14 +219,14 @@ void Storage::experiment4(int x, int y){
     int reached = 0;
     
     // Get starting timepoint
-    auto start = high_resolution_clock::now();
+    auto start = chrono::high_resolution_clock::now();
 
     // parse through if not end of range yet
     while (retrieve_record_votes(curPtr) <= y){
         // retrieve record ranging from x to y 
         if (retrieve_record_votes(curPtr) >= x && retrieve_record_votes(curPtr) <= y){    
-            if (curRecord%max_records_per_block == 0 || reached == 0) std::cout << "Block: " << block_no << std::endl;
-            display_record(curPtr); 
+            // if (curRecord%max_records_per_block == 0 || reached == 0) cout << "Block: " << block_no << endl;
+            // display_record(curPtr); 
             curRecord++;
             reached++;
             curPtr += record_size;
@@ -242,19 +243,11 @@ void Storage::experiment4(int x, int y){
         }
     }
     // Get ending timepoint
-    auto stop = high_resolution_clock::now();
+    auto stop = chrono::high_resolution_clock::now();
     // Get duration. Substart timepoints to
     // get duration. To cast it to proper unit
     // use duration cast method
-    auto duration = duration_cast<microseconds>(stop - start);
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
-    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+    cout << "Runtime of linear scan: " << duration.count() << " microseconds" << endl;
 }
-
-// int main(){
-//     Storage* storage = new Storage();
-//     storage->store_data();
-//     storage->display_all_records();
-//     std::cout << std::endl;
-//     storage->experiment1();
-// }
