@@ -57,6 +57,8 @@ public:
     void display_record(unsigned char * curPtr);
     void display_all_records();
     void experiment1();
+    void experiment3(int x);
+    void experiment4(int x, int y);
 };
 
 struct Record{

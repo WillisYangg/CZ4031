@@ -7,10 +7,11 @@
 #include "bplustree.h"
 #include <queue>
 #include <set>
-
+#include <chrono>
 
 
 using namespace std;
+using namespace std::chrono;
 
 //size of node = size of block = 200
 //size of node = 2 +4N + 4 + 8(N+1)
@@ -639,6 +640,7 @@ void BPlusTree::search(int x) {
   }
 }
 void BPlusTree::experiment2(){
+  cout << "Experiment 2"<< endl;
   cout<< "Parameter N: " << N <<endl;
   cout<< "Number of Nodes: " << this->nodes <<endl;
   cout<< "Number of Levels: " << this->levels<<endl;
@@ -651,6 +653,9 @@ void BPlusTree::experiment2(){
 }
 // Search operation
 void BPlusTree::experiment3(int x, Storage *storage) {
+  cout<< "Experiment 3" << endl;
+  // Get starting timepoint
+  auto start = high_resolution_clock::now();
   if (root == NULL) {
     cout << "Tree is empty\n";
   } else {
@@ -672,7 +677,7 @@ void BPlusTree::experiment3(int x, Storage *storage) {
     }
     for (int i = 0; i < cursor->size; i++) {
       if (cursor->key[i] == x) {
-        cout << "Found\n";
+        // cout << "Found\n";
         int count = 0;
         Node* buffer = cursor->ptr[i];
         float avg_avg_rating = 0;
@@ -686,9 +691,15 @@ void BPlusTree::experiment3(int x, Storage *storage) {
           else break;
         }
         avg_avg_rating /=count;
+        // Get ending timepoint
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+
         cout << "Index nodes accessed: " << nodes_accessed <<endl;
         cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
         cout << "Average of averageRatings: "<<avg_avg_rating << endl;
+        cout << "Runtime of retrieval process: " << duration.count() << "microseconds" << endl;
+        storage->experiment3(x);
         return;
       }
     }
@@ -697,10 +708,14 @@ void BPlusTree::experiment3(int x, Storage *storage) {
 }
 
 void BPlusTree::experiment4(int x, int y, Storage *storage){
+  cout << "Experiment 4"<< endl;
   int nodes_accessed = 1;
   set<int> blocks_accessed;
   int count = 0;
   float avg_avg_rating = 0;
+  
+  // Get starting timepoint
+  auto start = high_resolution_clock::now();
   if (root == NULL) {
     cout << "Tree is empty\n";
   } else {
@@ -728,7 +743,7 @@ void BPlusTree::experiment4(int x, int y, Storage *storage){
       }
     }
     while(temp->key[index] <= y){
-      cout << "Found" << temp->key[index] << endl;
+      // cout << "Found" << temp->key[index] << endl;
       Node* buffer = temp->ptr[index];
       while(true){
         count += buffer->size;
@@ -752,9 +767,15 @@ void BPlusTree::experiment4(int x, int y, Storage *storage){
   }
 
   avg_avg_rating /=count;
+  // Get ending timepoint
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<microseconds>(stop - start);
+
   cout << "Index nodes accessed: " << nodes_accessed <<endl;
   cout <<"Number of data blocks accessed: " << blocks_accessed.size() << endl;
   cout << "Average of averageRatings: "<<avg_avg_rating << endl;
+  cout << "Runtime of retrieval process: " << duration.count() << "microseconds" << endl;
+  storage->experiment4(x,y);
 }
 
 void BPlusTree::createTreeFromStorage(Storage *storage){
