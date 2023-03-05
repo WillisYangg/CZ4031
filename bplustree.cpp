@@ -396,21 +396,18 @@ void BPlusTree::deleteKey(int x)
 
 void BPlusTree::deleteInternal(int x, Node *curNode, Node *child)
 {
-  if (curNode == root)
+  // there is only 2 pointers
+  // deleting the child means the other remaining child becomes the rootnode
+  if (curNode == root && curNode->size == 1)
   {
-    // there is only 2 pointers
-    // deleting the child means the other remaining child becomes the rootnode
-    if (curNode->size == 1)
+    for (int i = 0; i < 2; i++)
     {
-      for (int i = 0; i < 2; i++)
+      if (curNode->ptr[i] == child)
       {
-        if (curNode->ptr[i] == child)
-        {
-          root = curNode->ptr[!i];
-          deallocate(curNode);
-          cout << "Changed root node\n";
-          return;
-        }
+        root = curNode->ptr[!i];
+        deallocate(curNode);
+        cout << "Changed root node\n";
+        return;
       }
     }
   }
