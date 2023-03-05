@@ -41,7 +41,7 @@ class BPlusTree
 public:
     BPlusTree();
     void search(int x);
-    void insert(int x,unsigned char *record);
+    void insertKey(int x,unsigned char *record);
     void deleteKey(int x);
     void display();
     void displayRecords(Storage *storage);
