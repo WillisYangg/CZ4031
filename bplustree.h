@@ -17,12 +17,12 @@ using namespace std;
 // //BP Node
 class Node 
 {
-    bool IS_LEAF; //2byte
-    int *key; //8byte
-    int size; //4byte
-    Node **ptr;//8byte
+    bool IS_LEAF; //2bytes
+    int *key; //4N bytes
+    int size; //4bytes
+    Node **ptr;//8N bytes
     //to point to records
-    unsigned char **records;//8byte
+    unsigned char **records;//8N bytes
     friend class BPlusTree;
 public:
     Node();
@@ -34,8 +34,8 @@ class BPlusTree
     int levels = 0;
     int numKeys = 0;
     Node *root; //root node
-    void insertInternal(int x, Node *, Node *);
-    void deleteInternal(int x, Node *, Node *);
+    void insertInternal(int x, Node *parent, Node *child);
+    void deleteInternal(int x, Node *curNode, Node *child);
     Node *findParent(Node* curNode, Node *child);
 
 public:
@@ -46,6 +46,7 @@ public:
     void display();
     void displayRecords(Storage *storage);
     void createTreeFromStorage(Storage *storage);
+    void deallocate(Node *node);
     Node* createNewLeafNode(int x, unsigned char *record);
     Node* createNewBufferNode(int x, unsigned char *record);
     Node** traverseToLeafNode(int x);
