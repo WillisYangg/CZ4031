@@ -964,3 +964,67 @@ void BPlusTree::display()
     }
   }
 }
+
+void BPlusTree::insertInternal(int x, Node *parent, Node *child) {
+    // parent is not full
+    if (parent->size < N) {
+        int insertIndex = 0;
+        while (x > parent->key[insertIndex] && insertIndex < parent->size) {
+            insertIndex++;
+        }
+        // make space for new key
+        for (int i = parent->size; i > insertIndex; i--) {
+            std::copy(parent->key + i - 1, parent->key + i, parent->key + i);
+            std::copy(parent->ptr + i, parent->ptr + i + 1, parent->ptr + i + 1);
+        }
+        parent->key[insertIndex] = x;
+        parent->ptr[insertIndex + 1] = child;
+        parent->size++;
+        std::cout << "Inserted key into internal node successfully\n";
+    } else {
+        // create new internal node
+        this->nodes++;
+        Node *newInternalNode = new Node();
+        int tempKey[N + 1];
+        Node *tempPtr[N + 2];
+        // store original in temp
+        std::copy(parent->key, parent->key + N, tempKey);
+        std::copy(parent->ptr, parent->ptr + N, tempPtr);
+        tempPtr[N] = parent->ptr[N];
+        int insertIndex = 0;
+        while (x > tempKey[insertIndex] && insertIndex < N) {
+            insertIndex++;
+        }
+
+        // make space for new key
+        for (int i = N; i > insertIndex; i--) {
+            std::copy(tempKey + i - 1, tempKey + i, tempKey + i);
+        }
+        tempKey[insertIndex] = x;
+        for (int i = N + 1; i > insertIndex; i--) {
+            std::copy(tempPtr + i - 1, tempPtr + i, tempPtr + i);
+        }
+        tempPtr[insertIndex + 1] = child;
+        newInternalNode->IS_LEAF = false;
+        parent->size = (N + 1) / 2;
+        newInternalNode->size = N - parent->size;
+        // fill up the new internal node
+        std::copy(tempKey + parent->size + 1, tempKey + N + 1, newInternalNode->key);
+        std::copy(tempPtr + parent->size + 1, tempPtr + N + 2, newInternalNode->ptr);
+        if (parent == root) {
+            // create a new root node
+            this->nodes++;
+            this->levels++;
+            Node *newRootNode = new Node();
+            newRootNode->key[0] = parent->key[parent->size];
+            newRootNode->ptr[0] = parent;
+            newRootNode->ptr[1] = newInternalNode;
+            newRootNode->IS_LEAF = false;
+            newRootNode->size = 1;
+            root = newRootNode;
+            std::cout << "Inserted new root node successfully\n";
+        } else {
+            insertInternal(parent->key[parent->size], findParent(root, parent), newInternalNode);
+        }
+    }
+}
