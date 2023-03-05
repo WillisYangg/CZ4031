@@ -175,7 +175,7 @@ void Storage::experiment3(int x){
     int curRecord = 0; 
     int reached = 0;
     
-    // Get starting timepoint
+    // Start timer
     auto start = chrono::high_resolution_clock::now();
 
     // parse through if not x yet
@@ -199,11 +199,8 @@ void Storage::experiment3(int x){
             block_no++;
         }
     }
-    // Get ending timepoint
+    // Stop timer
     auto stop = chrono::high_resolution_clock::now();
-    // Get duration. Substart timepoints to
-    // get duration. To cast it to proper unit
-    // use duration cast method
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
     cout << "Runtime of linear scan: " << duration.count() << " microseconds" << endl;
@@ -216,7 +213,7 @@ void Storage::experiment4(int x, int y){
     int curRecord = 0; 
     int reached = 0;
     
-    // Get starting timepoint
+    // Start timer
     auto start = chrono::high_resolution_clock::now();
 
     // parse through if not end of range yet
@@ -240,11 +237,8 @@ void Storage::experiment4(int x, int y){
             block_no++;
         }
     }
-    // Get ending timepoint
+    // Stop timer
     auto stop = chrono::high_resolution_clock::now();
-    // Get duration. Substart timepoints to
-    // get duration. To cast it to proper unit
-    // use duration cast method
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
     cout << "Runtime of linear scan: " << duration.count() << " microseconds" << endl;
@@ -255,7 +249,7 @@ void Storage::experiment5(int x){
     int block_no = 1;
     int curRecord = 0; 
 
-    // Get starting timepoint
+    // Start timer
     auto start = chrono::high_resolution_clock::now();
 
     // parse through if not x yet
@@ -280,11 +274,8 @@ void Storage::experiment5(int x){
         }
     }
 
-    // Get ending timepoint
+    // Stop timer
     auto stop = chrono::high_resolution_clock::now();
-    // Get duration. Substart timepoints to
-    // get duration. To cast it to proper unit
-    // use duration cast method
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Number of data blocks accessed by linear scan: " << block_no << endl;
     cout << "Runtime of linear scan for deletion: " << duration.count() << " microseconds" << endl;
